@@ -1,31 +1,33 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
+	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
-	"github.com/ilyakaznacheev/cleanenv"
 )
-
 
 type Config struct {
 	Email string `yaml:"email" env:"KNG_EMAIL"`
 	Password string `yaml:"password" env:"KNG_PASSWORD"`
 }
 
-var cfg Config
+func readConfig() *Config {
 
-func main() {
+	var cfg Config
 
 	err := cleanenv.ReadConfig("kng-config.yml", &cfg)
 	if err != nil {
 		log.Fatalf("Configuration is not set")
 	}
 
-	fmt.Println(cfg)
+	return &cfg
+}
 
+func main() {
+
+	conf := readConfig()
 
 	log.Println("Connecting to server...")
 
@@ -40,7 +42,7 @@ func main() {
 	defer c.Logout()
 
 	// Login
-	if err := c.Login(cfg.Email, cfg.Password); err != nil {
+	if err := c.Login(conf.Email, conf.Password); err != nil {
 		log.Fatal(err)
 	}
 	log.Println("Logged in")
