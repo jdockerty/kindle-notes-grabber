@@ -145,6 +145,7 @@ func main() {
 
 	ids := kindleMessageIds(c)
 
+	// Create a set of UIDs for the emails, each email has a specific ID associated with it
 	seqSet := new(imap.SeqSet)
 	seqSet.AddNum(ids...)
 
@@ -155,6 +156,9 @@ func main() {
 	// Bufferred channel for the last 10 messages
 	// NOTE: Could make this user configurable in the future?
 	messages := make(chan *imap.Message, 10)
+
+	// Run separate goroutine for fetching messages, these are
+	// passed back over the channel defined above
 	go func() {
 		if err := c.Fetch(seqSet, items, messages); err != nil {
 			log.Fatal(err)
