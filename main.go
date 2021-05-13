@@ -1,15 +1,19 @@
 package main
 
 import (
+	"io"
+	"io/ioutil"
 	"log"
+	"strings"
 
-	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
+	"github.com/emersion/go-message/mail"
+	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type Config struct {
-	Email string `yaml:"email" env:"KNG_EMAIL"`
+	Email    string `yaml:"email" env:"KNG_EMAIL"`
 	Password string `yaml:"password" env:"KNG_PASSWORD"`
 }
 
@@ -25,7 +29,99 @@ func readConfig() *Config {
 	return &cfg
 }
 
+func kindleMessageIds(c *client.Client) []uint32 {
+	_, err := c.Select("INBOX", false)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	criteria := imap.NewSearchCriteria()
+
+	// TODO: Implement a customisable time range for when to check for.
+	// twoDaysAgo := time.Now().AddDate(0, 0, -2)
+	// criteria.SentSince = twoDaysAgo
+
+	// TODO: Look into searching via IMAP, this doesn't seem to work
+	// as expected when looking for value in the email subject, will parse
+	// subject manually for now.
+	// subjSearch := "OR SUBJECT \"Your Kindle Notes\""
+
+	fromAmazon := "FROM no-reply@amazon.com"
+	criteria.Body = []string{fromAmazon}
+
+	ids, err := c.Search(criteria)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Got Ids:", ids)
+	return ids
+
+}
+
+// func readEmails(c *client.Client) {
+
+// 	ids := kindleMessageIds(c)
+
+// 	kindleNoteMessages := findNotes(c, ids)
+
+// 	for _, email := range kindleNoteMessages {
+// 		bodySt, err := imap.ParseBodySectionName("RFC822")
+// 		f := email.GetBody(bodySt)
+// 		if err != nil {
+// 			log.Fatal(err)
+// 		}
+// 		log.Println(f)
+// 	}
+
+// }
+
+// func findNotes(c *client.Client, ids []uint32) []*imap.Message {
+
+// 	var kindleNoteMessages []*imap.Message
+
+// 	if len(ids) > 0 {
+// 		log.Println("Parsing emails...")
+
+// 		// Create a set of UIDs for the emails, each email has a specific ID associated with it
+// 		seqset := new(imap.SeqSet)
+// 		seqset.AddNum(ids...)
+
+// 		messages := make(chan *imap.Message, 1)
+// 		done := make(chan error, 1)
+
+// 		var section imap.BodySectionName
+// 		items := []imap.FetchItem{section.FetchItem()}
+// 		log.Println("fetching")
+// 		go func() {
+// 			if err := c.Fetch(seqset, items, messages); err != nil {
+// 				log.Fatal(err)
+// 			}
+// 			log.Println("fetching...")
+// 		}()
+
+// 		for msg := range messages {
+
+// 			if subj := msg.Envelope.Subject; strings.HasPrefix(subj, "Your Kindle Notes") {
+// 				log.Println(subj)
+// 				kindleNoteMessages = append(kindleNoteMessages, msg)
+// 			}
+// 		}
+
+// 		if err := <-done; err != nil {
+// 			log.Fatal(err)
+// 		}
+
+// 		log.Printf("%d emails gathered", len(kindleNoteMessages))
+// 		return kindleNoteMessages
+// 	} else {
+// 		log.Println("No Kindle Note emails to parse.")
+// 		return kindleNoteMessages
+// 	}
+// }
+
 func main() {
+
+	// var wg sync.WaitGroup
 
 	conf := readConfig()
 
@@ -47,52 +143,85 @@ func main() {
 	}
 	log.Println("Logged in")
 
-	// List mailboxes
-	mailboxes := make(chan *imap.MailboxInfo, 10)
-	done := make(chan error, 1)
-	go func () {
-		done <- c.List("", "*", mailboxes)
-	}()
+	ids := kindleMessageIds(c)
 
-	log.Println("Mailboxes:")
-	for m := range mailboxes {
-		log.Println("* " + m.Name)
-	}
+	seqSet := new(imap.SeqSet)
+	seqSet.AddNum(ids...)
 
-	if err := <-done; err != nil {
-		log.Fatal(err)
-	}
+	// Get the whole message body
+	var section imap.BodySectionName
+	items := []imap.FetchItem{section.FetchItem()}
 
-	// Select INBOX
-	mbox, err := c.Select("INBOX", false)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("Flags for INBOX:", mbox.Flags)
-
-	// Get the last 4 messages
-	from := uint32(1)
-	to := mbox.Messages
-	if mbox.Messages > 3 {
-		// We're using unsigned integers here, only subtract if the result is > 0
-		from = mbox.Messages - 3
-	}
-	seqset := new(imap.SeqSet)
-	seqset.AddRange(from, to)
-
+	// Bufferred channel for the last 10 messages
+	// NOTE: Could make this user configurable in the future?
 	messages := make(chan *imap.Message, 10)
-	done = make(chan error, 1)
 	go func() {
-		done <- c.Fetch(seqset, []imap.FetchItem{imap.FetchEnvelope}, messages)
+		if err := c.Fetch(seqSet, items, messages); err != nil {
+			log.Fatal(err)
+		}
 	}()
 
-	log.Println("Last 4 messages:")
-	for msg := range messages {
-		log.Println("* " + msg.Envelope.Subject)
-	}
+	// Loop over the messages from the channel
+	for m := range messages {
 
-	if err := <-done; err != nil {
-		log.Fatal(err)
+		messageBody := m.GetBody(&section)
+
+		mailReader, err := mail.CreateReader(messageBody)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// If the email has a subject, continue through processing
+		// All the Amazon Kindle emails should have this.
+		header := mailReader.Header
+		if subject, err := header.Subject(); err == nil {
+
+			// Common prefix for subject header in the emails
+			// TODO: Maybe a more efficient way to do this?
+			// Could start with consolidating the above if statement, 
+			// since all Amazon emails have a subject?
+			if strings.HasPrefix(subject, "Your Kindle Notes") {
+				
+
+				for {
+
+					// Continue reading the parts until reaching EOF
+					part, err := mailReader.NextPart()
+					if err == io.EOF {
+						break
+					} else if err != nil {
+						log.Fatal(err)
+					}
+
+					switch h := part.Header.(type) {
+
+					// This is an attachment
+					case *mail.AttachmentHeader:
+
+						if filename, _ := h.Filename(); strings.HasSuffix(filename, ".csv") {
+							log.Printf("Got attachment: %v\n", filename)
+							
+							contentType, params, err := h.ContentType()
+							if err != nil {
+								log.Fatal(err)
+							}
+
+							if contentType != "text/csv" {
+								continue
+							}
+							log.Println(contentType, params)
+							rawData, _ := ioutil.ReadAll(part.Body)
+							ioutil.WriteFile("test.csv", rawData, 0644)
+
+						}
+
+					}
+				}
+
+				mailReader.Close()
+			}
+		}
+
 	}
 
 	log.Println("Done!")
