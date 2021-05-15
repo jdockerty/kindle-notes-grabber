@@ -30,10 +30,6 @@ func readConfig() *Config {
 }
 
 func kindleMessageIds(c *client.Client) []uint32 {
-	_, err := c.Select("INBOX", false)
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	criteria := imap.NewSearchCriteria()
 
@@ -142,6 +138,11 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Println("Logged in")
+
+	_, err = c.Select("INBOX", false)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	ids := kindleMessageIds(c)
 

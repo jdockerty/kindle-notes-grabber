@@ -16,3 +16,6 @@
 
 # Local development/configuration
 kng-config.yml
+
+# Local CSV files during development
+*.csv 
