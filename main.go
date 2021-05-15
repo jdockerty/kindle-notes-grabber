@@ -29,7 +29,7 @@ func readConfig() *Config {
 	return &cfg
 }
 
-func kindleMessageIds(c *client.Client) []uint32 {
+func amazonEmailIds(c *client.Client) []uint32 {
 
 	criteria := imap.NewSearchCriteria()
 
@@ -56,7 +56,7 @@ func kindleMessageIds(c *client.Client) []uint32 {
 
 // func readEmails(c *client.Client) {
 
-// 	ids := kindleMessageIds(c)
+// 	ids := amazonEmailIds(c)
 
 // 	kindleNoteMessages := findNotes(c, ids)
 
@@ -144,10 +144,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	ids := kindleMessageIds(c)
+	ids := amazonEmailIds(c)
 
 	// Create a set of UIDs for the emails, each email has a specific ID associated with it
 	seqSet := new(imap.SeqSet)
+
+	// Add the ids of the Amazon messages which can be parsed for Kindle note emails later
 	seqSet.AddNum(ids...)
 
 	// Get the whole message body
