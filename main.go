@@ -119,7 +119,7 @@ func main() {
 
 		mailReader, err := mail.CreateReader(messageBody)
 		if err != nil {
-			log.Fatal(err)
+			log.Println("Using unknown charset for reading mail header.")
 		}
 
 		// If the email has a subject, continue through processing
@@ -129,7 +129,7 @@ func main() {
 		subject, err := header.Subject()
 
 		if err == nil && strings.HasPrefix(subject, "Your Kindle Notes") {
-			
+
 			for {
 
 				// Continue reading the parts until reaching EOF
