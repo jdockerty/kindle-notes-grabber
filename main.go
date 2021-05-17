@@ -54,66 +54,6 @@ func amazonEmailIds(c *client.Client) []uint32 {
 
 }
 
-// func readEmails(c *client.Client) {
-
-// 	ids := amazonEmailIds(c)
-
-// 	kindleNoteMessages := findNotes(c, ids)
-
-// 	for _, email := range kindleNoteMessages {
-// 		bodySt, err := imap.ParseBodySectionName("RFC822")
-// 		f := email.GetBody(bodySt)
-// 		if err != nil {
-// 			log.Fatal(err)
-// 		}
-// 		log.Println(f)
-// 	}
-
-// }
-
-// func findNotes(c *client.Client, ids []uint32) []*imap.Message {
-
-// 	var kindleNoteMessages []*imap.Message
-
-// 	if len(ids) > 0 {
-// 		log.Println("Parsing emails...")
-
-// 		// Create a set of UIDs for the emails, each email has a specific ID associated with it
-// 		seqset := new(imap.SeqSet)
-// 		seqset.AddNum(ids...)
-
-// 		messages := make(chan *imap.Message, 1)
-// 		done := make(chan error, 1)
-
-// 		var section imap.BodySectionName
-// 		items := []imap.FetchItem{section.FetchItem()}
-// 		log.Println("fetching")
-// 		go func() {
-// 			if err := c.Fetch(seqset, items, messages); err != nil {
-// 				log.Fatal(err)
-// 			}
-// 			log.Println("fetching...")
-// 		}()
-
-// 		for msg := range messages {
-
-// 			if subj := msg.Envelope.Subject; strings.HasPrefix(subj, "Your Kindle Notes") {
-// 				log.Println(subj)
-// 				kindleNoteMessages = append(kindleNoteMessages, msg)
-// 			}
-// 		}
-
-// 		if err := <-done; err != nil {
-// 			log.Fatal(err)
-// 		}
-
-// 		log.Printf("%d emails gathered", len(kindleNoteMessages))
-// 		return kindleNoteMessages
-// 	} else {
-// 		log.Println("No Kindle Note emails to parse.")
-// 		return kindleNoteMessages
-// 	}
-// }
 
 func getAmazonMessages(c *client.Client, ids []uint32, section imap.BodySectionName) <-chan *imap.Message {
 	// Create a set of UIDs for the emails, each email has a specific ID associated with it
@@ -141,9 +81,7 @@ func getAmazonMessages(c *client.Client, ids []uint32, section imap.BodySectionN
 }
 
 func main() {
-
-	// var wg sync.WaitGroup
-
+	
 	conf := readConfig()
 
 	log.Println("Connecting to server...")
