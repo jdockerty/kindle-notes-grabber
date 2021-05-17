@@ -81,7 +81,7 @@ func getAmazonMessages(c *client.Client, ids []uint32, section imap.BodySectionN
 }
 
 func main() {
-	
+
 	conf := readConfig()
 
 	log.Println("Connecting to server...")
@@ -125,53 +125,49 @@ func main() {
 		// If the email has a subject, continue through processing
 		// All the Amazon Kindle emails should have this.
 		header := mailReader.Header
-		if subject, err := header.Subject(); err == nil {
 
-			// Common prefix for subject header in the emails
-			// TODO: Maybe a more efficient way to do this?
-			// Could start with consolidating the above if statement, 
-			// since all Amazon emails have a subject?
-			if strings.HasPrefix(subject, "Your Kindle Notes") {
-				
+		subject, err := header.Subject()
 
-				for {
+		if err == nil && strings.HasPrefix(subject, "Your Kindle Notes") {
+			
+			for {
 
-					// Continue reading the parts until reaching EOF
-					part, err := mailReader.NextPart()
-					if err == io.EOF {
-						break
-					} else if err != nil {
-						log.Fatal(err)
-					}
-
-					switch h := part.Header.(type) {
-
-					// This is an attachment
-					case *mail.AttachmentHeader:
-
-						if filename, _ := h.Filename(); strings.HasSuffix(filename, ".csv") {
-							log.Printf("Got attachment: %v\n", filename)
-							
-							contentType, params, err := h.ContentType()
-							if err != nil {
-								log.Fatal(err)
-							}
-
-							if contentType != "text/csv" {
-								continue
-							}
-							log.Println(contentType, params)
-							rawData, _ := ioutil.ReadAll(part.Body)
-							ioutil.WriteFile("test.csv", rawData, 0644)
-
-						}
-
-					}
+				// Continue reading the parts until reaching EOF
+				part, err := mailReader.NextPart()
+				if err == io.EOF {
+					break
+				} else if err != nil {
+					log.Fatal(err)
 				}
 
-				mailReader.Close()
+				switch h := part.Header.(type) {
+
+				// This is an attachment
+				case *mail.AttachmentHeader:
+
+					if filename, _ := h.Filename(); strings.HasSuffix(filename, ".csv") {
+						log.Printf("Got attachment: %v\n", filename)
+						
+						contentType, params, err := h.ContentType()
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						if contentType != "text/csv" {
+							continue
+						}
+						log.Println(contentType, params)
+						rawData, _ := ioutil.ReadAll(part.Body)
+						ioutil.WriteFile("test.csv", rawData, 0644)
+
+					}
+
+				}
 			}
+
+			mailReader.Close()
 		}
+
 
 	}
 
