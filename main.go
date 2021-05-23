@@ -125,7 +125,6 @@ func parseNotes(title string, emailAttachment []byte) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer tmpFile.Close()
 
 	for lineNum, row := range rows {
 
@@ -140,17 +139,22 @@ func parseNotes(title string, emailAttachment []byte) {
 		// Append to Notes type
 
 		tmpFile.Write(row)
+		if err != nil {
+			log.Fatal("Writing:", err)
+		}
 
+		// Re-add the newline for the next row
+		// TODO Better way to do this, maybe around the splitting via \n is an issue?
+		tmpFile.WriteString("\n")
 	}
 	tmpFile.Seek(0, 0)
+
 	csvFile := csv.NewReader(tmpFile)
-	csvFile.TrimLeadingSpace = true
 	csvFile.FieldsPerRecord = 4
 	
 	for {
 		record, err := csvFile.Read()
 		if err == io.EOF {
-			log.Println("CSV EOF")
 			break
 		}
 		if err != nil {
@@ -159,7 +163,6 @@ func parseNotes(title string, emailAttachment []byte) {
 
 		log.Println(title, record)
 	}
-	// TODO: Error reading CSV, on tempfile?
 
 }
 
