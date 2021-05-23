@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 
 	"encoding/csv"
@@ -125,6 +126,10 @@ func parseNotes(title string, emailAttachment []byte) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Close and remove the temporary file once completed.
+	defer tmpFile.Close()
+	defer os.Remove(tmpFile.Name())
 
 	for lineNum, row := range rows {
 
