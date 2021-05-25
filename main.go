@@ -44,6 +44,8 @@ const (
 	annotationIndex int = 3
 )
 
+// readConfig uses the 'cleanenv' package to read from the relevant configuration file,
+// acting as a wrapper for the error and returning the correctly configured struct.
 func readConfig() *Config {
 
 	var cfg Config
