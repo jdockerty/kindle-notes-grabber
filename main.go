@@ -35,6 +35,15 @@ type Notes struct {
 	Notes  []Note
 }
 
+const (
+
+	// Index positions of the relevant records, these are the column headings in the CSV file.
+	typeIndex       int = 0
+	locationIndex   int = 1
+	starredIndex    int = 2
+	annotationIndex int = 3
+)
+
 func readConfig() *Config {
 
 	var cfg Config
@@ -152,23 +161,38 @@ func parseNotes(title string, emailAttachment []byte) {
 		// TODO Better way to do this, maybe around the splitting via \n is an issue?
 		tmpFile.WriteString("\n")
 	}
+
+	// Move to the beginning of the file, as we've recently written to it
+	// and thus moved the offset.
 	tmpFile.Seek(0, 0)
 
 	csvFile := csv.NewReader(tmpFile)
 	csvFile.FieldsPerRecord = 4
-	
-	for {
-		record, err := csvFile.Read()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			log.Fatal(err)
+
+	records, _ := csvFile.ReadAll()
+
+	for index, record := range records {
+
+		// Skip top record as these are the field labels
+		if index == 0 {
+			continue
 		}
 
-		log.Println(title, record)
+		var n Note
+		n.Type = record[typeIndex]
+		n.Location = record[locationIndex]
+		n.Annotation = record[annotationIndex]
+
+		n.Starred = false
+		starred := record[starredIndex]
+		if starred == "*" {
+			n.Starred = true
+		}
+
+		notes = append(notes, n)
 	}
 
+	return notes
 }
 
 func main() {
