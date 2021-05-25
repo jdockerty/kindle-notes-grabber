@@ -126,7 +126,14 @@ func getMailReaders(messages <-chan *imap.Message, section imap.BodySectionName)
 	return mailReaders
 }
 
-func parseNotes(title string, emailAttachment []byte) {
+// parseNotes is used to create a temporary CSV file which can be
+// read from. This is done as it provides a simpler mechanicm than directly
+// dealing with the emailAttachment directly, which is in a byte array, by
+// instead cutting out the irrelevant rows and placing it into a temporary CSV file, we
+// can leverage the csv package to handle the heavy lifting for us.
+func parseNotes(title string, emailAttachment []byte) []Note {
+
+	var notes []Note
 
 	// CSV rows are separate by a newline character
 	rows := bytes.Split(emailAttachment, []byte("\n"))
