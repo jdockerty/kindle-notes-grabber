@@ -13,3 +13,9 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+# Local development/configuration
+kng-config.yml
+
+# Local CSV files during development
+*.csv 
