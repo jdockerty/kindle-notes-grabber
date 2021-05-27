@@ -51,7 +51,7 @@ func (suite *ConfigSuite) TestConfig() {
 }
 
 func (suite *ConfigSuite) TestInvalidConfigPath() {
-	
+
 	_, err := config.New("some_fake_path/")
 	assert.Error(suite.T(), err, "Expected error return from function, got %s", err)
 }
