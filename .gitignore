@@ -15,7 +15,7 @@
 # vendor/
 
 # Local development/configuration
-kng-config.yml
+kng-config.yaml
 
 # Local CSV files during development
 *.csv 
