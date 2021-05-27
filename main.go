@@ -14,13 +14,8 @@ import (
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
 	"github.com/emersion/go-message/mail"
-	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/jdockerty/kindle-notes-grabber/config"
 )
-
-type Config struct {
-	Email    string `yaml:"email" env:"KNG_EMAIL"`
-	Password string `yaml:"password" env:"KNG_PASSWORD"`
-}
 
 type Note struct {
 	Type       string
@@ -43,20 +38,6 @@ const (
 	starredIndex    int = 2
 	annotationIndex int = 3
 )
-
-// readConfig uses the 'cleanenv' package to read from the relevant configuration file,
-// acting as a wrapper for the error and returning the correctly configured struct.
-func readConfig() *Config {
-
-	var cfg Config
-
-	err := cleanenv.ReadConfig("kng-config.yml", &cfg)
-	if err != nil {
-		log.Fatalf("Configuration is not set")
-	}
-
-	return &cfg
-}
 
 func amazonEmailIds(c *client.Client) []uint32 {
 
@@ -206,8 +187,12 @@ func parseNotes(title string, emailAttachment []byte) []Note {
 
 func main() {
 
-	conf := readConfig()
-
+	// TODO: Modify to take user argument later on, a flag with a default set if not specified.
+	configPath := "kng-config.yaml"
+	conf, err := config.New(configPath)
+	if err != nil {
+		log.Fatalf("Cannot read configuration: %s", err)
+	}
 	log.Println("Connecting to server...")
 
 	// Connect to server
