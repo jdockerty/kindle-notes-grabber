@@ -9,6 +9,7 @@ import (
 
 type imapClient interface {
 	Search(criteria *imap.SearchCriteria) ([]uint32, error)
+	Fetch(seqset *imap.SeqSet, items []imap.FetchItem, ch chan *imap.Message) error
 }
 
 type Note struct {
@@ -45,6 +46,31 @@ func (n *Notes) GetEmailIds(c imapClient, sc *imap.SearchCriteria) []uint32 {
 	}
 	log.Println("Got Ids:", ids)
 	return ids
+}
+
+func (n *Notes) GetAmazonMessages(c imapClient, ids []uint32, section imap.BodySectionName) <-chan *imap.Message {
+	// Create a set of UIDs for the emails, each email has a specific ID associated with it
+	seqSet := new(imap.SeqSet)
+
+	// Add the ids of the Amazon messages which can be parsed for Kindle note emails later
+	seqSet.AddNum(ids...)
+
+	// Get the whole message body
+	items := []imap.FetchItem{section.FetchItem()}
+
+	// Bufferred channel for the last 10 messages
+	// NOTE: Could make this user configurable in the future?
+	messages := make(chan *imap.Message, 10)
+
+	// Run separate goroutine for fetching messages, these are
+	// passed back over the channel defined above
+	go func() {
+		if err := c.Fetch(seqSet, items, messages); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	return messages
 }
 
 func New() *Notes {
