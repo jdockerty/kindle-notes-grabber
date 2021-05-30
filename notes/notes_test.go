@@ -53,11 +53,8 @@ func TestGetNewNotesDefaults(t *testing.T) {
 	assert := assert.New(t)
 	testNotes := notes.New()
 
-	var blankString string
-	var blankNotes notes.Note
-
-	assert.Empty(testNotes.Author, blankString)
-	assert.Empty(testNotes.Title, blankString)
-	assert.Empty(testNotes.Notes, blankNotes)
+	assert.Empty(testNotes.Author, "A newly created Notes struct should contain a blank string for the 'Author'")
+	assert.Empty(testNotes.Title, "A newly created Notes struct should contain a blank string for the 'Title'")
+	assert.Empty(testNotes.Notes, "A newly created Notes struct should not contain any populated Note structs within the slice")
 
 }
