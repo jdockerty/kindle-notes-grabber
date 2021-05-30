@@ -65,30 +65,30 @@ func amazonEmailIds(c *client.Client) []uint32 {
 
 }
 
-func getAmazonMessages(c *client.Client, ids []uint32, section imap.BodySectionName) <-chan *imap.Message {
-	// Create a set of UIDs for the emails, each email has a specific ID associated with it
-	seqSet := new(imap.SeqSet)
+// func getAmazonMessages(c *client.Client, ids []uint32, section imap.BodySectionName) <-chan *imap.Message {
+// 	// Create a set of UIDs for the emails, each email has a specific ID associated with it
+// 	seqSet := new(imap.SeqSet)
 
-	// Add the ids of the Amazon messages which can be parsed for Kindle note emails later
-	seqSet.AddNum(ids...)
+// 	// Add the ids of the Amazon messages which can be parsed for Kindle note emails later
+// 	seqSet.AddNum(ids...)
 
-	// Get the whole message body
-	items := []imap.FetchItem{section.FetchItem()}
+// 	// Get the whole message body
+// 	items := []imap.FetchItem{section.FetchItem()}
 
-	// Bufferred channel for the last 10 messages
-	// NOTE: Could make this user configurable in the future?
-	messages := make(chan *imap.Message, 10)
+// 	// Bufferred channel for the last 10 messages
+// 	// NOTE: Could make this user configurable in the future?
+// 	messages := make(chan *imap.Message, 10)
 
-	// Run separate goroutine for fetching messages, these are
-	// passed back over the channel defined above
-	go func() {
-		if err := c.Fetch(seqSet, items, messages); err != nil {
-			log.Fatal(err)
-		}
-	}()
+// 	// Run separate goroutine for fetching messages, these are
+// 	// passed back over the channel defined above
+// 	go func() {
+// 		if err := c.Fetch(seqSet, items, messages); err != nil {
+// 			log.Fatal(err)
+// 		}
+// 	}()
 
-	return messages
-}
+// 	return messages
+// }
 
 func getMailReaders(messages <-chan *imap.Message, section imap.BodySectionName) []*mail.Reader {
 
@@ -217,19 +217,17 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// ids := amazonEmailIds(c)
 	n := notes.New()
 
 	// NOTE: Hard-coded criteria for now.
 	criteria := *imap.NewSearchCriteria()
-
 	fromAmazon := "FROM no-reply@amazon.com"
 	criteria.Body = []string{fromAmazon}
 
 	ids := n.GetEmailIds(c, &criteria)
 
 	var section imap.BodySectionName
-	messages := getAmazonMessages(c, ids, section)
+	messages := n.GetAmazonMessages(c, ids, section)
 
 	mailReaders := getMailReaders(messages, section)
 
