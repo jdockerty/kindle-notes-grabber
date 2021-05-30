@@ -4,14 +4,21 @@ import (
 	"log"
 
 	"github.com/emersion/go-imap"
-	_ "github.com/emersion/go-imap/client"
+	// _ "github.com/emersion/go-imap/client"
 )
 
+// imapClient interface which satisfies the required methods defined in
+// emersion/go-imap/client, this enables pluggability when testing as
+// the external calls to an email account and their return values can
+// be mocked.
 type imapClient interface {
 	Search(criteria *imap.SearchCriteria) ([]uint32, error)
 	Fetch(seqset *imap.SeqSet, items []imap.FetchItem, ch chan *imap.Message) error
 }
 
+// Note is a struct which contains a singular record about a note or highlight
+// from a particular book. The difference between a note and a highlight is that
+// a highlight has no annotation.
 type Note struct {
 	Type       string
 	Location   string
@@ -19,6 +26,9 @@ type Note struct {
 	Starred    bool
 }
 
+// Notes are the overarching struct for the program. This encapsulates a slice of 'Note', which
+// is the various records of information that a person has jotted down about a book, including
+// other metadata pertaining to it.
 type Notes struct {
 	Author string
 	Title  string
@@ -73,6 +83,8 @@ func (n *Notes) GetAmazonMessages(c imapClient, ids []uint32, section imap.BodyS
 	return messages
 }
 
+// New returns a default Notes struct with none of the fields populated, this is
+// ready to be used throughout the program.
 func New() *Notes {
 	return &Notes{}
 }
