@@ -11,13 +11,13 @@ import (
 type mockClient struct{}
 
 // Search is the mocked IMAP 'Search' function, this ensures that the mockClient satisfies
-// the imapClient interface by implementing the correct method. 
+// the imapClient interface by implementing the correct method.
 func (mc mockClient) Search(search *imap.SearchCriteria) ([]uint32, error) {
 	return []uint32{1, 2, 3}, nil
 }
 
 // Fetch is the mocked IMAP 'Fetch' function, this ensures that the mockClient satisfies
-// the imapClient interface by implementing the correct method. 
+// the imapClient interface by implementing the correct method.
 func (mc mockClient) Fetch(seqset *imap.SeqSet, items []imap.FetchItem, ch chan *imap.Message) error {
 	fakeMsg := &imap.Message{}
 	ch <- fakeMsg
