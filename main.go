@@ -15,6 +15,7 @@ import (
 	"github.com/emersion/go-imap/client"
 	"github.com/emersion/go-message/mail"
 	"github.com/jdockerty/kindle-notes-grabber/config"
+	"github.com/jdockerty/kindle-notes-grabber/notes"
 )
 
 type Note struct {
@@ -216,7 +217,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	ids := amazonEmailIds(c)
+	// ids := amazonEmailIds(c)
+	n := notes.New()
+
+	// NOTE: Hard-coded criteria for now.
+	criteria := *imap.NewSearchCriteria()
+
+	fromAmazon := "FROM no-reply@amazon.com"
+	criteria.Body = []string{fromAmazon}
+
+	ids := n.GetEmailIds(c, &criteria)
 
 	var section imap.BodySectionName
 	messages := getAmazonMessages(c, ids, section)
