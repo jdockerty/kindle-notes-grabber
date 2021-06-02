@@ -90,25 +90,25 @@ func amazonEmailIds(c *client.Client) []uint32 {
 // 	return messages
 // }
 
-func getMailReaders(messages <-chan *imap.Message, section imap.BodySectionName) []*mail.Reader {
+// func getMailReaders(messages <-chan *imap.Message, section imap.BodySectionName) []*mail.Reader {
 
-	var mailReaders []*mail.Reader
-	// Loop over the messages from the channel
-	for m := range messages {
+// 	var mailReaders []*mail.Reader
+// 	// Loop over the messages from the channel
+// 	for m := range messages {
 
-		messageBody := m.GetBody(&section)
+// 		messageBody := m.GetBody(&section)
 
-		mailReader, err := mail.CreateReader(messageBody)
-		if err != nil {
-			log.Println("Using unknown charset for reading mail header.")
-		}
+// 		mailReader, err := mail.CreateReader(messageBody)
+// 		if err != nil {
+// 			log.Println("Using unknown charset for reading mail header.")
+// 		}
 
-		mailReaders = append(mailReaders, mailReader)
+// 		mailReaders = append(mailReaders, mailReader)
 
-	}
+// 	}
 
-	return mailReaders
-}
+// 	return mailReaders
+// }
 
 // parseNotes is used to create a temporary CSV file which can be
 // read from. This is done as it provides a simpler mechanicm than directly
@@ -229,7 +229,7 @@ func main() {
 	var section imap.BodySectionName
 	messages := n.GetAmazonMessages(c, ids, section)
 
-	mailReaders := getMailReaders(messages, section)
+	mailReaders := n.GetMailReaders(messages, section)
 
 	for _, mailReader := range mailReaders {
 		header := mailReader.Header
