@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/emersion/go-imap"
-	// _ "github.com/emersion/go-imap/client"
+	"github.com/emersion/go-message/mail"
 )
 
 // imapClient interface which satisfies the required methods defined in
@@ -81,6 +81,28 @@ func (n *Notes) GetAmazonMessages(c imapClient, ids []uint32, section imap.BodyS
 	}()
 
 	return messages
+}
+
+func (n *Notes) GetMailReaders(messages <-chan *imap.Message, section imap.BodySectionName) []*mail.Reader {
+	
+	var mailReaders []*mail.Reader
+	
+	// Loop over the messages from the channel
+	for m := range messages {
+
+		messageBody := m.GetBody(&section)
+
+		mailReader, err := mail.CreateReader(messageBody)
+		if err != nil {
+			log.Println("Using unknown charset for reading mail header.")
+		}
+
+		mailReaders = append(mailReaders, mailReader)
+
+	}
+
+	return mailReaders
+
 }
 
 // New returns a default Notes struct with none of the fields populated, this is
