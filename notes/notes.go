@@ -84,9 +84,9 @@ func (n *Notes) GetAmazonMessages(c imapClient, ids []uint32, section imap.BodyS
 }
 
 func (n *Notes) GetMailReaders(messages <-chan *imap.Message, section imap.BodySectionName) []*mail.Reader {
-	
+
 	var mailReaders []*mail.Reader
-	
+
 	// Loop over the messages from the channel
 	for m := range messages {
 
