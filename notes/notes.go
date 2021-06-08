@@ -30,7 +30,6 @@ type Note struct {
 // is the various records of information that a person has jotted down about a book, including
 // other metadata pertaining to it.
 type Notes struct {
-	Author string
 	Title  string
 	Notes  []Note
 }
