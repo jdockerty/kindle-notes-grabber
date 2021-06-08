@@ -18,18 +18,18 @@ import (
 	"github.com/jdockerty/kindle-notes-grabber/notes"
 )
 
-type Note struct {
-	Type       string
-	Location   string
-	Annotation string
-	Starred    bool
-}
+// type Note struct {
+// 	Type       string
+// 	Location   string
+// 	Annotation string
+// 	Starred    bool
+// }
 
-type Notes struct {
-	Author string
-	Title  string
-	Notes  []Note
-}
+// type Notes struct {
+// 	Author string
+// 	Title  string
+// 	Notes  []Note
+// }
 
 const (
 
@@ -40,30 +40,30 @@ const (
 	annotationIndex int = 3
 )
 
-func amazonEmailIds(c *client.Client) []uint32 {
+// func amazonEmailIds(c *client.Client) []uint32 {
 
-	criteria := imap.NewSearchCriteria()
+// 	criteria := imap.NewSearchCriteria()
 
-	// TODO: Implement a customisable time range for when to check for.
-	// twoDaysAgo := time.Now().AddDate(0, 0, -2)
-	// criteria.SentSince = twoDaysAgo
+// 	// TODO: Implement a customisable time range for when to check for.
+// 	// twoDaysAgo := time.Now().AddDate(0, 0, -2)
+// 	// criteria.SentSince = twoDaysAgo
 
-	// TODO: Look into searching via IMAP, this doesn't seem to work
-	// as expected when looking for value in the email subject, will parse
-	// subject manually for now.
-	// subjSearch := "OR SUBJECT \"Your Kindle Notes\""
+// 	// TODO: Look into searching via IMAP, this doesn't seem to work
+// 	// as expected when looking for value in the email subject, will parse
+// 	// subject manually for now.
+// 	// subjSearch := "OR SUBJECT \"Your Kindle Notes\""
 
-	fromAmazon := "FROM no-reply@amazon.com"
-	criteria.Body = []string{fromAmazon}
+// 	fromAmazon := "FROM no-reply@amazon.com"
+// 	criteria.Body = []string{fromAmazon}
 
-	ids, err := c.Search(criteria)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("Got Ids:", ids)
-	return ids
+// 	ids, err := c.Search(criteria)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	log.Println("Got Ids:", ids)
+// 	return ids
 
-}
+// }
 
 // func getAmazonMessages(c *client.Client, ids []uint32, section imap.BodySectionName) <-chan *imap.Message {
 // 	// Create a set of UIDs for the emails, each email has a specific ID associated with it
@@ -115,9 +115,9 @@ func amazonEmailIds(c *client.Client) []uint32 {
 // dealing with the emailAttachment directly, which is in a byte array, by
 // instead cutting out the irrelevant rows and placing it into a temporary CSV file, we
 // can leverage the csv package to handle the heavy lifting for us.
-func parseNotes(title string, emailAttachment []byte) []Note {
+func parseNotes(title string, emailAttachment []byte) []notes.Note {
 
-	var notes []Note
+	var parsedNotes []notes.Note
 
 	// CSV rows are separate by a newline character
 	rows := bytes.Split(emailAttachment, []byte("\n"))
@@ -169,7 +169,8 @@ func parseNotes(title string, emailAttachment []byte) []Note {
 			continue
 		}
 
-		var n Note
+		var n notes.Note
+
 		n.Type = record[typeIndex]
 		n.Location = record[locationIndex]
 		n.Annotation = record[annotationIndex]
@@ -180,10 +181,10 @@ func parseNotes(title string, emailAttachment []byte) []Note {
 			n.Starred = true
 		}
 
-		notes = append(notes, n)
+		parsedNotes = append(parsedNotes, n)
 	}
 
-	return notes
+	return parsedNotes
 }
 
 func main() {
@@ -263,7 +264,12 @@ func main() {
 
 						log.Println(bookTitle)
 						data, _ := ioutil.ReadAll(part.Body)
-						parseNotes(bookTitle, data)
+
+						myNotes := parseNotes(bookTitle, data)
+						for _, note := range myNotes {
+							n.Notes = append(myNotes, note)
+						}
+						n.Title = bookTitle
 					}
 
 				}
@@ -272,5 +278,6 @@ func main() {
 		}
 
 	}
+	log.Println(n)
 	log.Println("Done!")
 }
