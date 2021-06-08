@@ -46,8 +46,8 @@ type Note struct {
 // is the various records of information that a person has jotted down about a book, including
 // other metadata pertaining to it.
 type Notes struct {
-	Title  string
-	Notes  []Note
+	Title string
+	Notes []Note
 }
 
 func (n *Notes) GetEmailIds(c imapClient, sc *imap.SearchCriteria) []uint32 {
