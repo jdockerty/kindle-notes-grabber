@@ -1,7 +1,14 @@
 package notes
 
 import (
+	"bytes"
+	"encoding/csv"
+	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
+	"os"
+	"strings"
 
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-message/mail"
@@ -15,6 +22,15 @@ type imapClient interface {
 	Search(criteria *imap.SearchCriteria) ([]uint32, error)
 	Fetch(seqset *imap.SeqSet, items []imap.FetchItem, ch chan *imap.Message) error
 }
+
+const (
+
+	// Index positions of the relevant records, these are the column headings in the CSV file.
+	typeIndex       int = 0
+	locationIndex   int = 1
+	starredIndex    int = 2
+	annotationIndex int = 3
+)
 
 // Note is a struct which contains a singular record about a note or highlight
 // from a particular book. The difference between a note and a highlight is that
