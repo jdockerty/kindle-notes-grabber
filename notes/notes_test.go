@@ -8,6 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// mockClient is an empty struct used as a fake IMAP client for 
+// satisfying the respective interface of the 'notes' package.
 type mockClient struct{}
 
 // Search is the mocked IMAP 'Search' function, this ensures that the mockClient satisfies
