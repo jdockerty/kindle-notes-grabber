@@ -1,6 +1,8 @@
 package notes_test
 
 import (
+	"fmt"
+	"os"
 	"testing"
 
 	"github.com/emersion/go-imap"
@@ -8,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// mockClient is an empty struct used as a fake IMAP client for 
+// mockClient is an empty struct used as a fake IMAP client for
 // satisfying the respective interface of the 'notes' package.
 type mockClient struct{}
 
@@ -26,6 +28,19 @@ func (mc mockClient) Fetch(seqset *imap.SeqSet, items []imap.FetchItem, ch chan 
 	return nil
 }
 
+func getFakeNotesData() *notes.Notes {
+	dummyNotes := notes.New()
+	
+	var testNote notes.Note
+	testNote.Annotation = "Annotation used in test"
+	testNote.Location = "Page 1"
+	testNote.Starred = false
+	testNote.Type = "Highlight"
+
+	dummyNotes.Notes = append(dummyNotes.Notes, testNote)
+	
+	return dummyNotes
+}
 func TestGetEmailIds(t *testing.T) {
 	var m mockClient
 
@@ -57,5 +72,20 @@ func TestGetNewNotesDefaults(t *testing.T) {
 
 	assert.Empty(testNotes.Title, "A newly created Notes struct should contain a blank string for the 'Title'")
 	assert.Empty(testNotes.Notes, "A newly created Notes struct should not contain any populated Note structs within the slice")
+
+}
+
+func TestWriteNoteFile(t *testing.T) {
+	assert := assert.New(t)
+
+	testNotes := getFakeNotesData()
+
+	fileName := fmt.Sprintf("%s.yaml", testNotes.Title)
+	
+	defer os.Remove(fileName)
+	
+	i, err := notes.Write(testNotes)
+	assert.Nil(err)
+	assert.Greater(i, 0, "The number of bytes written should be greater than 0")
 
 }
