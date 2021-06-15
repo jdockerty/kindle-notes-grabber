@@ -96,9 +96,9 @@ func TestWriteNoteFile(t *testing.T) {
 
 	testNotes := getFakeNotesData()
 
-	fileName := fmt.Sprintf("%s.yaml", testNotes.Title)
+	filename := fmt.Sprintf("%s-notes.txt", testNotes.Title)
 
-	defer os.Remove(fileName)
+	defer os.Remove(filename)
 
 	i, err := notes.Write(testNotes)
 	assert.Nil(err)
