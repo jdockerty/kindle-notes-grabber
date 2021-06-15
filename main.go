@@ -24,6 +24,7 @@ func main() {
 	log.Println("Connecting to server...")
 
 	// Connect to server
+	// TODO: Implement other providers as mapping format, e.g. gmail : imap.gmail.com:993
 	c, err := client.DialTLS("imap.gmail.com:993", nil)
 	if err != nil {
 		log.Fatal(err)
