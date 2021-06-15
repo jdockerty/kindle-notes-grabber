@@ -29,17 +29,33 @@ func (mc mockClient) Fetch(seqset *imap.SeqSet, items []imap.FetchItem, ch chan 
 }
 
 func getFakeNotesData() *notes.Notes {
-	dummyNotes := notes.New()
 
-	var testNote notes.Note
-	testNote.Annotation = "Annotation used in test"
-	testNote.Location = "Page 1"
-	testNote.Starred = false
-	testNote.Type = "Highlight"
+	fakeNotes := []notes.Note{
+		{
+			Annotation: "Annotation 1 used in test",
+			Location:   "Page 1",
+			Starred:    false,
+			Type:       "Highlight",
+		},
+		{
+			Annotation: "Annotation 2 used in test",
+			Location:   "Page 2",
+			Starred:    true,
+			Type:       "Highlight",
+		},
+		{
+			Annotation: "Annotation 3 used in test",
+			Location:   "Page 50",
+			Starred:    false,
+			Type:       "Note",
+		},
+	}
 
-	dummyNotes.Notes = append(dummyNotes.Notes, testNote)
+	return &notes.Notes{
+		Title: "test-book-title",
+		Notes: fakeNotes,
+	}
 
-	return dummyNotes
 }
 func TestGetEmailIds(t *testing.T) {
 	var m mockClient
