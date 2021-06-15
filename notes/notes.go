@@ -236,7 +236,6 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 							n.Notes = append(myNotes, note)
 						}
 						n.Title = bookTitle
-						log.Println(n)
 					}
 
 				}
@@ -251,6 +250,8 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 // This creates a file with the name of <book-title>-notes.txt and writes each
 // Note struct into it, separating each entry with a newline.
 func Write(n *Notes) (int, error) {
+
+	log.Printf("Writing notes for %s", n.Title)
 
 	var totalBytes int
 
