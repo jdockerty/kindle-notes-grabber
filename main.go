@@ -9,10 +9,14 @@ import (
 	"github.com/jdockerty/kindle-notes-grabber/notes"
 )
 
+const (
+	// TODO: Modify to take user argument later on, a flag with a default set if not specified.
+	configPath = "kng-config.yaml"
+	fromAmazon = "FROM no-reply@amazon.com"
+	mailbox = "INBOX"
+)
 func main() {
 
-	// TODO: Modify to take user argument later on, a flag with a default set if not specified.
-	configPath := "kng-config.yaml"
 	conf, err := config.New(configPath)
 	if err != nil {
 		log.Fatalf("Cannot read configuration: %s", err)
@@ -35,7 +39,7 @@ func main() {
 	}
 	log.Println("Logged in")
 
-	_, err = c.Select("INBOX", false)
+	_, err = c.Select(mailbox, false)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,7 +48,6 @@ func main() {
 
 	// NOTE: Hard-coded criteria for now.
 	criteria := *imap.NewSearchCriteria()
-	fromAmazon := "FROM no-reply@amazon.com"
 	criteria.Body = []string{fromAmazon}
 
 	ids := myNotes.GetEmailIds(c, &criteria)
