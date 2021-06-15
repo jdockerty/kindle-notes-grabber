@@ -251,6 +251,7 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 func Write(n *Notes) (int, error) {
 	return 1, nil
 }
+
 // New returns a default Notes struct with none of the fields populated, this is
 // ready to be used throughout the program.
 func New() *Notes {

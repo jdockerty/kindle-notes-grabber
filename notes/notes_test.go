@@ -30,7 +30,7 @@ func (mc mockClient) Fetch(seqset *imap.SeqSet, items []imap.FetchItem, ch chan 
 
 func getFakeNotesData() *notes.Notes {
 	dummyNotes := notes.New()
-	
+
 	var testNote notes.Note
 	testNote.Annotation = "Annotation used in test"
 	testNote.Location = "Page 1"
@@ -38,7 +38,7 @@ func getFakeNotesData() *notes.Notes {
 	testNote.Type = "Highlight"
 
 	dummyNotes.Notes = append(dummyNotes.Notes, testNote)
-	
+
 	return dummyNotes
 }
 func TestGetEmailIds(t *testing.T) {
@@ -81,9 +81,9 @@ func TestWriteNoteFile(t *testing.T) {
 	testNotes := getFakeNotesData()
 
 	fileName := fmt.Sprintf("%s.yaml", testNotes.Title)
-	
+
 	defer os.Remove(fileName)
-	
+
 	i, err := notes.Write(testNotes)
 	assert.Nil(err)
 	assert.Greater(i, 0, "The number of bytes written should be greater than 0")
