@@ -228,15 +228,17 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 
 						bookTitle := strings.TrimSuffix(params["name"], ".csv")
 
-						log.Println(bookTitle)
+						// Change the title to lower case and replace spaces with dashes for consistency
+						adjustedTitle := strings.ReplaceAll(strings.ToLower(bookTitle), " ", "-")
+
+						log.Println(adjustedTitle)
 						data, _ := ioutil.ReadAll(part.Body)
 
-						myNotes := parseNotes(bookTitle, data)
+						myNotes := parseNotes(adjustedTitle, data)
 						for _, note := range myNotes {
 							n.Notes = append(myNotes, note)
 						}
-						n.Title = bookTitle
-						log.Println(n)
+						n.Title = adjustedTitle
 					}
 
 				}
@@ -248,8 +250,34 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 }
 
 // Write is used to write the Notes struct, for a given book, into a text file.
+// This creates a file with the name of <book-title>-notes.txt and writes each
+// Note struct into it, separating each entry with a newline.
+// TODO: Sort before writing so that notes appear before highlights etc?
 func Write(n *Notes) (int, error) {
-	return 1, nil
+
+	log.Printf("Writing notes for %s", n.Title)
+
+	var totalBytes int
+
+	notesFilename := fmt.Sprintf("%s-notes.txt", n.Title)
+	f, err := os.Create(notesFilename)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	for _, x := range n.Notes {
+		noteEntry := fmt.Sprintf("Annotation: %s\nLocation: %s\nType: %s\nStarred: %t\n\n",
+			x.Annotation, x.Location, x.Type, x.Starred)
+
+		bytesWritten, err := f.WriteString(noteEntry)
+		if err != nil {
+			log.Fatal(err)
+		}
+		totalBytes += bytesWritten
+	}
+
+	return totalBytes, nil
 }
 
 // New returns a default Notes struct with none of the fields populated, this is

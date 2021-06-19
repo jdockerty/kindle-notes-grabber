@@ -29,17 +29,33 @@ func (mc mockClient) Fetch(seqset *imap.SeqSet, items []imap.FetchItem, ch chan 
 }
 
 func getFakeNotesData() *notes.Notes {
-	dummyNotes := notes.New()
 
-	var testNote notes.Note
-	testNote.Annotation = "Annotation used in test"
-	testNote.Location = "Page 1"
-	testNote.Starred = false
-	testNote.Type = "Highlight"
+	fakeNotes := []notes.Note{
+		{
+			Annotation: "Text that was highlighted 1",
+			Location:   "Page 1",
+			Starred:    false,
+			Type:       "Highlight",
+		},
+		{
+			Annotation: "Text that was highlighted 2",
+			Location:   "Page 2",
+			Starred:    true,
+			Type:       "Highlight",
+		},
+		{
+			Annotation: "Annotation 3 used in test",
+			Location:   "Page 50",
+			Starred:    false,
+			Type:       "Note",
+		},
+	}
 
-	dummyNotes.Notes = append(dummyNotes.Notes, testNote)
+	return &notes.Notes{
+		Title: "test-book-title",
+		Notes: fakeNotes,
+	}
 
-	return dummyNotes
 }
 func TestGetEmailIds(t *testing.T) {
 	var m mockClient
@@ -80,9 +96,9 @@ func TestWriteNoteFile(t *testing.T) {
 
 	testNotes := getFakeNotesData()
 
-	fileName := fmt.Sprintf("%s.yaml", testNotes.Title)
+	filename := fmt.Sprintf("%s-notes.txt", testNotes.Title)
 
-	defer os.Remove(fileName)
+	defer os.Remove(filename)
 
 	i, err := notes.Write(testNotes)
 	assert.Nil(err)

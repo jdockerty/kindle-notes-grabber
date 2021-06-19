@@ -61,6 +61,6 @@ func main() {
 
 	myNotes.Populate(mailReaders)
 
-	log.Println(myNotes)
+	notes.Write(myNotes)
 	log.Println("Done!")
 }
