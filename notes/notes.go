@@ -228,14 +228,17 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 
 						bookTitle := strings.TrimSuffix(params["name"], ".csv")
 
-						log.Println(bookTitle)
+						// Change the title to lower case and replace spaces with dashes for consistency
+						adjustedTitle := strings.ReplaceAll(strings.ToLower(bookTitle), " ", "-")
+
+						log.Println(adjustedTitle)
 						data, _ := ioutil.ReadAll(part.Body)
 
-						myNotes := parseNotes(bookTitle, data)
+						myNotes := parseNotes(adjustedTitle, data)
 						for _, note := range myNotes {
 							n.Notes = append(myNotes, note)
 						}
-						n.Title = bookTitle
+						n.Title = adjustedTitle
 					}
 
 				}
