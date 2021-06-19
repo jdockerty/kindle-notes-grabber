@@ -249,6 +249,7 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 // Write is used to write the Notes struct, for a given book, into a text file.
 // This creates a file with the name of <book-title>-notes.txt and writes each
 // Note struct into it, separating each entry with a newline.
+// TODO: Sort before writing so that notes appear before highlights etc?
 func Write(n *Notes) (int, error) {
 
 	log.Printf("Writing notes for %s", n.Title)
