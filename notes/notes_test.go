@@ -32,13 +32,13 @@ func getFakeNotesData() *notes.Notes {
 
 	fakeNotes := []notes.Note{
 		{
-			Annotation: "Annotation 1 used in test",
+			Annotation: "Text that was highlighted 1",
 			Location:   "Page 1",
 			Starred:    false,
 			Type:       "Highlight",
 		},
 		{
-			Annotation: "Annotation 2 used in test",
+			Annotation: "Text that was highlighted 2",
 			Location:   "Page 2",
 			Starred:    true,
 			Type:       "Highlight",
