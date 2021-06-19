@@ -32,4 +32,4 @@ Ensure you have the generated binary saved into your `PATH`, this means that you
 ```bash
 kng run
 ```
-*At present, this is setup to work with Gmail accounts (more will be added in the future). It is recommended to create an [app password](https://support.google.com/accounts/answer/185833?hl=en) to use as your method of signing in using the app, although using your regular password also works.*
+*At present, this is setup to work with Gmail accounts (more will be added in the future). It is recommended to create an [app password](https://support.google.com/accounts/answer/185833?hl=en) to use as your method of signing in using the app if you have 2FA enabled. Otherwise using your regular password also works, but you may need to enable 'Insecure applications' to access your account, so it is recommended to have a generated app password which you can revoke at any time.*
