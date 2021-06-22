@@ -136,7 +136,7 @@ func parseNotes(title string, emailAttachment []byte) []Note {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	log.Println("Created temporary file for", title)
 	// Close and remove the temporary file once completed.
 	defer tmpFile.Close()
 	defer os.Remove(tmpFile.Name())
@@ -161,6 +161,7 @@ func parseNotes(title string, emailAttachment []byte) []Note {
 		// Re-add the newline for the next row
 		// TODO Better way to do this, maybe around the splitting via \n is an issue?
 		tmpFile.WriteString("\n")
+		log.Printf("Row [%d]: Written for %s\n", lineNum, title)
 	}
 
 	// Move to the beginning of the file, as we've recently written to it
@@ -219,7 +220,7 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 				case *mail.AttachmentHeader:
 
 					if filename, _ := h.Filename(); strings.HasSuffix(filename, ".csv") {
-						log.Printf("Got attachment: %v\n", filename)
+						log.Println("Got file:", filename)
 
 						_, params, err := h.ContentType()
 						if err != nil {
