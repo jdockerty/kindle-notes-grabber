@@ -73,12 +73,12 @@ func GetEmailIds(c imapClient, sc *imap.SearchCriteria) []uint32 {
 	return ids
 }
 
-func (n *Notes) GetAmazonMessages(c imapClient, ids []uint32, section imap.BodySectionName) <-chan *imap.Message {
+func (n *Notes) GetAmazonMessage(c imapClient, id uint32, section imap.BodySectionName) <-chan *imap.Message {
 	// Create a set of UIDs for the emails, each email has a specific ID associated with it
 	seqSet := new(imap.SeqSet)
 
 	// Add the ids of the Amazon messages which can be parsed for Kindle note emails later
-	seqSet.AddNum(ids...)
+	seqSet.AddNum(id)
 
 	// Get the whole message body
 	items := []imap.FetchItem{section.FetchItem()}
