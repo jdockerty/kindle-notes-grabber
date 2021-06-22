@@ -50,7 +50,7 @@ type Notes struct {
 	Notes []Note
 }
 
-func (n *Notes) GetEmailIds(c imapClient, sc *imap.SearchCriteria) []uint32 {
+func GetEmailIds(c imapClient, sc *imap.SearchCriteria) []uint32 {
 	// criteria := imap.NewSearchCriteria()
 
 	// TODO: Implement a customisable time range for when to check for.
