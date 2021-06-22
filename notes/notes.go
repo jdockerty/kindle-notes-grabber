@@ -279,6 +279,14 @@ func Write(n *Notes) (int, error) {
 	return totalBytes, nil
 }
 
+// Save will write the titles which have been written into a notebook text file to
+// key-value pairs, this is done in order to avoid reading the same titles multiple times
+// when they have already been processed.
+func Save(n *Notes) error {
+	
+	return nil
+}
+
 // New returns a default Notes struct with none of the fields populated, this is
 // ready to be used throughout the program.
 func New() *Notes {
