@@ -60,23 +60,22 @@ func getFakeNotesData() *notes.Notes {
 func TestGetEmailIds(t *testing.T) {
 	var m mockClient
 
-	n := notes.New()
-
 	// Can pass nil as search criteria as this takes a pointer to imap.SearchCriteria, which nil satisfies.
-	ids := n.GetEmailIds(m, nil)
+	ids := notes.GetEmailIds(m, nil)
 
 	var uint32Slice []uint32
 	assert.IsType(t, uint32Slice, ids)
 }
 
-func TestGetAmazonMessages(t *testing.T) {
+func TestGetAmazonMessage(t *testing.T) {
 	assert := assert.New(t)
 	var m mockClient
 
 	var section imap.BodySectionName
 	n := notes.New()
-	fakeIds := []uint32{1, 2, 3}
-	msgs := n.GetAmazonMessages(m, fakeIds, section)
+
+	var fakeId uint32 = 1 
+	msgs := n.GetAmazonMessage(m, fakeId, section)
 
 	var receiveChannelType <-chan *imap.Message
 	assert.IsType(receiveChannelType, msgs)
@@ -96,7 +95,7 @@ func TestWriteNoteFile(t *testing.T) {
 
 	testNotes := getFakeNotesData()
 
-	filename := fmt.Sprintf("%s-notes.txt", testNotes.Title)
+	filename := fmt.Sprintf("%s.txt", testNotes.Title)
 
 	defer os.Remove(filename)
 
