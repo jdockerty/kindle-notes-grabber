@@ -10,6 +10,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+
+var fakeNotes *notes.Notes = getFakeNotesData()
+
 // mockClient is an empty struct used as a fake IMAP client for
 // satisfying the respective interface of the 'notes' package.
 type mockClient struct{}
@@ -93,21 +96,21 @@ func TestGetNewNotesDefaults(t *testing.T) {
 func TestWriteNoteFile(t *testing.T) {
 	assert := assert.New(t)
 
-	testNotes := getFakeNotesData()
-
-	filename := fmt.Sprintf("%s.txt", testNotes.Title)
+	filename := fmt.Sprintf("%s.txt", fakeNotes.Title)
 
 	defer os.Remove(filename)
 
-	i, err := notes.Write(testNotes)
+	i, err := notes.Write(fakeNotes)
 	assert.Nil(err)
 	assert.Greater(i, 0, "The number of bytes written should be greater than 0")
 
 }
 
 func TestShouldReadAllNotes(t *testing.T) {
-	
-	testNotes := getFakeNotesData()
-	numNotes := len(testNotes.Notes)
+	numNotes := len(fakeNotes.Notes)
 	assert.Equal(t, 3, numNotes)
+}
+
+func TestShouldWriteTitleToSaveFile(t *testing.T) {
+
 }
