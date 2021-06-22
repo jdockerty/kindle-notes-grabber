@@ -232,14 +232,15 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 						// Change the title to lower case and replace spaces with dashes for consistency
 						adjustedTitle := strings.ReplaceAll(strings.ToLower(bookTitle), " ", "-")
 
-						log.Println(adjustedTitle)
+						log.Println("Adjusted title:", adjustedTitle)
 						data, _ := ioutil.ReadAll(part.Body)
 
 						myNotes := parseNotes(adjustedTitle, data)
-						for _, note := range myNotes {
-							n.Notes = append(myNotes, note)
-						}
+						n.Notes = append(n.Notes, myNotes...)
+
 						n.Title = adjustedTitle
+						log.Println("Set title for notebook", n.Title)
+						log.Println("Notes in notebook", len(n.Notes))
 					}
 
 				}
@@ -256,20 +257,22 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 // TODO: Sort before writing so that notes appear before highlights etc?
 func Write(n *Notes) (int, error) {
 
-	log.Printf("Writing notes for %s", n.Title)
-
+	log.Printf("Writing notes for %s\n", n.Title)
 	var totalBytes int
 
-	notesFilename := fmt.Sprintf("%s-notes.txt", n.Title)
+	// The 'notebook' prefix is automatically added by Amazon to the CSV file, we can just use .txt as an extension
+	notesFilename := fmt.Sprintf("%s.txt", n.Title)
+	log.Println("Note file:", notesFilename)
 	f, err := os.Create(notesFilename)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer f.Close()
 
-	for _, x := range n.Notes {
+	for _, note := range n.Notes {
+		log.Println("Got note:", note)
 		noteEntry := fmt.Sprintf("Annotation: %s\nLocation: %s\nType: %s\nStarred: %t\n\n",
-			x.Annotation, x.Location, x.Type, x.Starred)
+			note.Annotation, note.Location, note.Type, note.Starred)
 
 		bytesWritten, err := f.WriteString(noteEntry)
 		if err != nil {
