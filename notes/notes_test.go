@@ -105,3 +105,10 @@ func TestWriteNoteFile(t *testing.T) {
 	assert.Greater(i, 0, "The number of bytes written should be greater than 0")
 
 }
+
+func TestShouldReadAllNotes(t *testing.T) {
+	
+	testNotes := getFakeNotesData()
+	numNotes := len(testNotes.Notes)
+	assert.Equal(t, 3, numNotes)
+}
