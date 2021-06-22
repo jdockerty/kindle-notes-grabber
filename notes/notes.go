@@ -51,11 +51,6 @@ type Notes struct {
 }
 
 func GetEmailIds(c imapClient, sc *imap.SearchCriteria) []uint32 {
-	// criteria := imap.NewSearchCriteria()
-
-	// TODO: Implement a customisable time range for when to check for.
-	// twoDaysAgo := time.Now().AddDate(0, 0, -2)
-	// criteria.SentSince = twoDaysAgo
 
 	// TODO: Look into searching via IMAP, this doesn't seem to work
 	// as expected when looking for value in the email subject, will parse
