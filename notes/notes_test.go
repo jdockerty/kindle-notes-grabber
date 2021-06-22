@@ -112,5 +112,8 @@ func TestShouldReadAllNotes(t *testing.T) {
 }
 
 func TestShouldWriteTitleToSaveFile(t *testing.T) {
+	assert := assert.New(t)
 
+	err := notes.Save(fakeNotes)
+	assert.Nil(err)
 }
