@@ -7,6 +7,8 @@ require (
 	github.com/emersion/go-message v0.14.1
 	github.com/ilyakaznacheev/cleanenv v1.2.5
 	github.com/stretchr/testify v1.7.0
+	golang.org/x/tools v0.0.0-20180917221912-90fa682c2a6e
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 // indirect
 )
