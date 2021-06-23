@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-
 var fakeNotes *notes.Notes = getFakeNotesData()
 
 // mockClient is an empty struct used as a fake IMAP client for
@@ -77,7 +76,7 @@ func TestGetAmazonMessage(t *testing.T) {
 	var section imap.BodySectionName
 	n := notes.New()
 
-	var fakeId uint32 = 1 
+	var fakeId uint32 = 1
 	msgs := n.GetAmazonMessage(m, fakeId, section)
 
 	var receiveChannelType <-chan *imap.Message
@@ -114,6 +113,10 @@ func TestShouldReadAllNotes(t *testing.T) {
 func TestShouldWriteTitleToSaveFile(t *testing.T) {
 	assert := assert.New(t)
 
-	err := notes.Save(fakeNotes)
+	var multipleFakeNotes []*notes.Notes
+
+	// Append duplicated notes to act as 2 items within the slice
+	multipleFakeNotes = append(multipleFakeNotes, fakeNotes, fakeNotes)
+	err := notes.Save(multipleFakeNotes)
 	assert.Nil(err)
 }
