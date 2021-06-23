@@ -12,6 +12,7 @@ import (
 
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-message/mail"
+	"gopkg.in/yaml.v3"
 )
 
 // imapClient interface which satisfies the required methods defined in
@@ -30,6 +31,8 @@ const (
 	locationIndex   int = 1
 	starredIndex    int = 2
 	annotationIndex int = 3
+
+	programDirectoryName = "kindle-notes"
 )
 
 // Note is a struct which contains a singular record about a note or highlight
@@ -279,11 +282,66 @@ func Write(n *Notes) (int, error) {
 	return totalBytes, nil
 }
 
-// Save will write the titles which have been written into a notebook text file to
-// key-value pairs, this is done in order to avoid reading the same titles multiple times
+// exists returns whether the given file or directory exists
+func exists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
+
+// Save will write the titles which have been written into a 'completed notebooks' file of
+// key-value pairs, this is done in order to avoid parsing the same titles multiple times
 // when they have already been processed.
-func Save(n *Notes) error {
-	
+func Save(n []*Notes) error {
+
+	booksCompleted := make(map[string]bool, len(n))
+
+	for _, completedBook := range n {
+
+		// Skip any erronious issues of the title being blank
+		if completedBook.Title == "" {
+			continue
+		}
+
+		booksCompleted[completedBook.Title] = true
+	}
+
+	userHomeDirectory, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+
+	saveDirectory := fmt.Sprintf("%s/%s", userHomeDirectory, programDirectoryName)
+	saveDirectoryExists, err := exists(saveDirectory)
+	if err != nil {
+		return err
+	}
+
+	// Save the completed notebooks file if the home directory exists,
+	// otherwise we need to return an error
+	if saveDirectoryExists {
+		savePath := fmt.Sprintf("%s/completed-notebooks.yaml", saveDirectory)
+		f, err := os.Create(savePath)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		enc := yaml.NewEncoder(f)
+		defer enc.Close()
+
+		enc.Encode(booksCompleted)
+		log.Println("Written notes to", savePath)
+
+	} else {
+		return fmt.Errorf("a 'kindle-notes' directory does not at '%s' to write the completed notebooks save file", userHomeDirectory)
+	}
+
 	return nil
 }
 
