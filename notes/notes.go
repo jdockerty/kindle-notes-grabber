@@ -135,7 +135,7 @@ func parseNotes(title string, emailAttachment []byte) []Note {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Created temporary file for", title)
+
 	// Close and remove the temporary file once completed.
 	defer tmpFile.Close()
 	defer os.Remove(tmpFile.Name())
@@ -160,7 +160,6 @@ func parseNotes(title string, emailAttachment []byte) []Note {
 		// Re-add the newline for the next row
 		// TODO Better way to do this, maybe around the splitting via \n is an issue?
 		tmpFile.WriteString("\n")
-		log.Printf("Row [%d]: Written for %s\n", lineNum, title)
 	}
 
 	// Move to the beginning of the file, as we've recently written to it
@@ -239,7 +238,6 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 
 						n.Title = adjustedTitle
 						log.Println("Set title for notebook", n.Title)
-						log.Println("Notes in notebook", len(n.Notes))
 					}
 
 				}
@@ -269,7 +267,6 @@ func Write(n *Notes) (int, error) {
 	defer f.Close()
 
 	for _, note := range n.Notes {
-		log.Println("Got note:", note)
 		noteEntry := fmt.Sprintf("Annotation: %s\nLocation: %s\nType: %s\nStarred: %t\n\n",
 			note.Annotation, note.Location, note.Type, note.Starred)
 
