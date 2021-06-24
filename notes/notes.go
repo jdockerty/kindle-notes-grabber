@@ -197,6 +197,10 @@ func parseNotes(title string, emailAttachment []byte) []Note {
 }
 
 func (n *Notes) Populate(mailReaders []*mail.Reader) {
+	completedBooks, err := loadCompletedBooks()
+	if err != nil {
+		panic(err)
+	}
 	for _, mailReader := range mailReaders {
 		header := mailReader.Header
 		subject, err := header.Subject()
@@ -229,6 +233,11 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 
 						// Change the title to lower case and replace spaces with dashes for consistency
 						adjustedTitle := strings.ReplaceAll(strings.ToLower(bookTitle), " ", "-")
+						
+						if _, ok := (*completedBooks)[adjustedTitle]; ok {
+							log.Printf("%s already seen", adjustedTitle)
+							continue
+						}
 
 						log.Println("Adjusted title:", adjustedTitle)
 						data, _ := ioutil.ReadAll(part.Body)
@@ -300,12 +309,6 @@ func Save(n []*Notes) error {
 	booksCompleted := make(map[string]bool, len(n))
 
 	for _, completedBook := range n {
-
-		// Skip any erronious issues of the title being blank
-		if completedBook.Title == "" {
-			continue
-		}
-
 		booksCompleted[completedBook.Title] = true
 	}
 
@@ -341,6 +344,38 @@ func Save(n []*Notes) error {
 	}
 
 	return nil
+}
+
+func loadCompletedBooks() (*map[string]bool, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, err
+	}
+
+	saveFilePath := fmt.Sprintf("%s/%s/completed-notebooks.yaml", homeDir, programDirectoryName)
+	saveFileExists, err := exists(saveFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	if saveFileExists {
+		f, err := os.Open(saveFilePath)
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+	
+		completedBooks := make(map[string]bool)
+	
+		decoder := yaml.NewDecoder(f)
+		decoder.Decode(completedBooks)
+		log.Println(completedBooks)
+	
+		return &completedBooks, nil
+	}
+	blankMap := make(map[string]bool)
+	return &blankMap, nil
+
 }
 
 // New returns a default Notes struct with none of the fields populated, this is
