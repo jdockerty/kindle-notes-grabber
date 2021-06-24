@@ -15,15 +15,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// imapClient interface which satisfies the required methods defined in
-// emersion/go-imap/client, this enables pluggability when testing as
-// the external calls to an email account and their return values can
-// be mocked.
-type imapClient interface {
-	Search(criteria *imap.SearchCriteria) ([]uint32, error)
-	Fetch(seqset *imap.SeqSet, items []imap.FetchItem, ch chan *imap.Message) error
-}
-
 const (
 
 	// Index positions of the relevant records, these are the column headings in the CSV file.
@@ -34,6 +25,16 @@ const (
 
 	programDirectoryName = "kindle-notes"
 )
+
+
+// imapClient interface which satisfies the required methods defined in
+// emersion/go-imap/client, this enables pluggability when testing as
+// the external calls to an email account and their return values can
+// be mocked.
+type imapClient interface {
+	Search(criteria *imap.SearchCriteria) ([]uint32, error)
+	Fetch(seqset *imap.SeqSet, items []imap.FetchItem, ch chan *imap.Message) error
+}
 
 // Note is a struct which contains a singular record about a note or highlight
 // from a particular book. The difference between a note and a highlight is that
