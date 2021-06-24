@@ -26,7 +26,6 @@ const (
 	programDirectoryName = "kindle-notes"
 )
 
-
 // imapClient interface which satisfies the required methods defined in
 // emersion/go-imap/client, this enables pluggability when testing as
 // the external calls to an email account and their return values can
@@ -233,7 +232,7 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 
 						// Change the title to lower case and replace spaces with dashes for consistency
 						adjustedTitle := strings.ReplaceAll(strings.ToLower(bookTitle), " ", "-")
-						
+
 						if _, ok := (*completedBooks)[adjustedTitle]; ok {
 							log.Printf("%s already seen", adjustedTitle)
 							continue
@@ -364,13 +363,13 @@ func loadCompletedBooks() (*map[string]bool, error) {
 			return nil, err
 		}
 		defer f.Close()
-	
+
 		completedBooks := make(map[string]bool)
-	
+
 		decoder := yaml.NewDecoder(f)
 		decoder.Decode(completedBooks)
 		log.Println(completedBooks)
-	
+
 		return &completedBooks, nil
 	}
 	blankMap := make(map[string]bool)
