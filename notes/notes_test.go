@@ -31,10 +31,10 @@ func (mc mockClient) Fetch(seqset *imap.SeqSet, items []imap.FetchItem, ch chan 
 	return nil
 }
 
-// mockNotes is a stand-in for the 'notes' package and has mocked out I/O reliant functions created using it. 
+// mockNotes is a stand-in for the 'notes' package and has mocked out I/O reliant functions created using it.
 type mockNotes struct{}
 
-// Save is the mock version of this function, this is used for the tests as it 
+// Save is the mock version of this function, this is used for the tests as it
 // usually writes information to do the disk, which is not necessary when running the test suite.
 func (mn *mockNotes) Save(n []*notes.Notes) error {
 	return nil
