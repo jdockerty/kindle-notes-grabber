@@ -11,6 +11,7 @@ import (
 )
 
 var fakeNotes *notes.Notes = getFakeNotesData()
+var m mockNotes
 
 // mockClient is an empty struct used as a fake IMAP client for
 // satisfying the respective interface of the 'notes' package.
@@ -27,6 +28,13 @@ func (mc mockClient) Search(search *imap.SearchCriteria) ([]uint32, error) {
 func (mc mockClient) Fetch(seqset *imap.SeqSet, items []imap.FetchItem, ch chan *imap.Message) error {
 	fakeMsg := &imap.Message{}
 	ch <- fakeMsg
+	return nil
+}
+
+type mockNotes struct{}
+
+// Save is the 
+func (mn *mockNotes) Save(n []*notes.Notes) error {
 	return nil
 }
 
@@ -117,6 +125,6 @@ func TestShouldWriteTitleToSaveFile(t *testing.T) {
 
 	// Append duplicated notes to act as 2 items within the slice
 	multipleFakeNotes = append(multipleFakeNotes, fakeNotes, fakeNotes)
-	err := notes.Save(multipleFakeNotes)
+	err := m.Save(multipleFakeNotes)
 	assert.Nil(err)
 }
