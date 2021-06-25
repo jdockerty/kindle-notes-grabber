@@ -46,21 +46,26 @@ func main() {
 		log.Fatal(err)
 	}
 
-	myNotes := notes.New()
-
 	// NOTE: Hard-coded criteria for now.
 	criteria := *imap.NewSearchCriteria()
 	criteria.Body = []string{fromAmazon}
 
-	ids := myNotes.GetEmailIds(c, &criteria)
+	ids := notes.GetEmailIds(c, &criteria)
 
+	var notesCollection []*notes.Notes
 	var section imap.BodySectionName
-	messages := myNotes.GetAmazonMessages(c, ids, section)
+	for _, id := range ids {
+		myNotes := notes.New()
+		messages := myNotes.GetAmazonMessage(c, id, section)
+		mailReaders := myNotes.GetMailReaders(messages, section)
+		myNotes.Populate(mailReaders)
+		notes.Write(myNotes)
+		notesCollection = append(notesCollection, myNotes)
+	}
 
-	mailReaders := myNotes.GetMailReaders(messages, section)
-
-	myNotes.Populate(mailReaders)
-
-	notes.Write(myNotes)
+	err = notes.Save(notesCollection)
+	if err != nil {
+		log.Fatal(err)
+	}
 	log.Println("Done!")
 }

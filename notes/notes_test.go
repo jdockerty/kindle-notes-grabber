@@ -10,6 +10,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var fakeNotes *notes.Notes = getFakeNotesData()
+var m mockNotes
+
 // mockClient is an empty struct used as a fake IMAP client for
 // satisfying the respective interface of the 'notes' package.
 type mockClient struct{}
@@ -25,6 +28,15 @@ func (mc mockClient) Search(search *imap.SearchCriteria) ([]uint32, error) {
 func (mc mockClient) Fetch(seqset *imap.SeqSet, items []imap.FetchItem, ch chan *imap.Message) error {
 	fakeMsg := &imap.Message{}
 	ch <- fakeMsg
+	return nil
+}
+
+// mockNotes is a stand-in for the 'notes' package and has mocked out I/O reliant functions created using it.
+type mockNotes struct{}
+
+// Save is the mock version of this function, this is used for the tests as it
+// usually writes information to do the disk, which is not necessary when running the test suite.
+func (mn *mockNotes) Save(n []*notes.Notes) error {
 	return nil
 }
 
@@ -60,23 +72,22 @@ func getFakeNotesData() *notes.Notes {
 func TestGetEmailIds(t *testing.T) {
 	var m mockClient
 
-	n := notes.New()
-
 	// Can pass nil as search criteria as this takes a pointer to imap.SearchCriteria, which nil satisfies.
-	ids := n.GetEmailIds(m, nil)
+	ids := notes.GetEmailIds(m, nil)
 
 	var uint32Slice []uint32
 	assert.IsType(t, uint32Slice, ids)
 }
 
-func TestGetAmazonMessages(t *testing.T) {
+func TestGetAmazonMessage(t *testing.T) {
 	assert := assert.New(t)
 	var m mockClient
 
 	var section imap.BodySectionName
 	n := notes.New()
-	fakeIds := []uint32{1, 2, 3}
-	msgs := n.GetAmazonMessages(m, fakeIds, section)
+
+	var fakeId uint32 = 1
+	msgs := n.GetAmazonMessage(m, fakeId, section)
 
 	var receiveChannelType <-chan *imap.Message
 	assert.IsType(receiveChannelType, msgs)
@@ -94,14 +105,28 @@ func TestGetNewNotesDefaults(t *testing.T) {
 func TestWriteNoteFile(t *testing.T) {
 	assert := assert.New(t)
 
-	testNotes := getFakeNotesData()
-
-	filename := fmt.Sprintf("%s-notes.txt", testNotes.Title)
+	filename := fmt.Sprintf("%s.txt", fakeNotes.Title)
 
 	defer os.Remove(filename)
 
-	i, err := notes.Write(testNotes)
+	i, err := notes.Write(fakeNotes)
 	assert.Nil(err)
 	assert.Greater(i, 0, "The number of bytes written should be greater than 0")
 
+}
+
+func TestShouldReadAllNotes(t *testing.T) {
+	numNotes := len(fakeNotes.Notes)
+	assert.Equal(t, 3, numNotes)
+}
+
+func TestShouldWriteTitleToSaveFile(t *testing.T) {
+	assert := assert.New(t)
+
+	var multipleFakeNotes []*notes.Notes
+
+	// Append duplicated notes to act as 2 items within the slice
+	multipleFakeNotes = append(multipleFakeNotes, fakeNotes, fakeNotes)
+	err := m.Save(multipleFakeNotes)
+	assert.Nil(err)
 }

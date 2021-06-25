@@ -12,6 +12,18 @@ import (
 
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-message/mail"
+	"gopkg.in/yaml.v3"
+)
+
+const (
+
+	// Index positions of the relevant records, these are the column headings in the CSV file.
+	typeIndex       int = 0
+	locationIndex   int = 1
+	starredIndex    int = 2
+	annotationIndex int = 3
+
+	programDirectoryName = "kindle-notes"
 )
 
 // imapClient interface which satisfies the required methods defined in
@@ -22,15 +34,6 @@ type imapClient interface {
 	Search(criteria *imap.SearchCriteria) ([]uint32, error)
 	Fetch(seqset *imap.SeqSet, items []imap.FetchItem, ch chan *imap.Message) error
 }
-
-const (
-
-	// Index positions of the relevant records, these are the column headings in the CSV file.
-	typeIndex       int = 0
-	locationIndex   int = 1
-	starredIndex    int = 2
-	annotationIndex int = 3
-)
 
 // Note is a struct which contains a singular record about a note or highlight
 // from a particular book. The difference between a note and a highlight is that
@@ -50,12 +53,7 @@ type Notes struct {
 	Notes []Note
 }
 
-func (n *Notes) GetEmailIds(c imapClient, sc *imap.SearchCriteria) []uint32 {
-	// criteria := imap.NewSearchCriteria()
-
-	// TODO: Implement a customisable time range for when to check for.
-	// twoDaysAgo := time.Now().AddDate(0, 0, -2)
-	// criteria.SentSince = twoDaysAgo
+func GetEmailIds(c imapClient, sc *imap.SearchCriteria) []uint32 {
 
 	// TODO: Look into searching via IMAP, this doesn't seem to work
 	// as expected when looking for value in the email subject, will parse
@@ -73,12 +71,12 @@ func (n *Notes) GetEmailIds(c imapClient, sc *imap.SearchCriteria) []uint32 {
 	return ids
 }
 
-func (n *Notes) GetAmazonMessages(c imapClient, ids []uint32, section imap.BodySectionName) <-chan *imap.Message {
+func (n *Notes) GetAmazonMessage(c imapClient, id uint32, section imap.BodySectionName) <-chan *imap.Message {
 	// Create a set of UIDs for the emails, each email has a specific ID associated with it
 	seqSet := new(imap.SeqSet)
 
 	// Add the ids of the Amazon messages which can be parsed for Kindle note emails later
-	seqSet.AddNum(ids...)
+	seqSet.AddNum(id)
 
 	// Get the whole message body
 	items := []imap.FetchItem{section.FetchItem()}
@@ -122,7 +120,7 @@ func (n *Notes) GetMailReaders(messages <-chan *imap.Message, section imap.BodyS
 
 // parseNotes is used to create a temporary CSV file which can be
 // read from. This is done as it provides a simpler mechanicm than directly
-// dealing with the emailAttachment directly, which is in a byte array, by
+// dealing with the emailAttachment, which is in a byte array, by
 // instead cutting out the irrelevant rows and placing it into a temporary CSV file, we
 // can leverage the csv package to handle the heavy lifting for us.
 func parseNotes(title string, emailAttachment []byte) []Note {
@@ -198,6 +196,10 @@ func parseNotes(title string, emailAttachment []byte) []Note {
 }
 
 func (n *Notes) Populate(mailReaders []*mail.Reader) {
+	completedBooks, err := loadCompletedBooks()
+	if err != nil {
+		panic(err)
+	}
 	for _, mailReader := range mailReaders {
 		header := mailReader.Header
 		subject, err := header.Subject()
@@ -219,7 +221,7 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 				case *mail.AttachmentHeader:
 
 					if filename, _ := h.Filename(); strings.HasSuffix(filename, ".csv") {
-						log.Printf("Got attachment: %v\n", filename)
+						log.Println("Got file:", filename)
 
 						_, params, err := h.ContentType()
 						if err != nil {
@@ -231,14 +233,19 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 						// Change the title to lower case and replace spaces with dashes for consistency
 						adjustedTitle := strings.ReplaceAll(strings.ToLower(bookTitle), " ", "-")
 
-						log.Println(adjustedTitle)
+						if _, ok := (*completedBooks)[adjustedTitle]; ok {
+							log.Printf("%s already seen", adjustedTitle)
+							continue
+						}
+
+						log.Println("Adjusted title:", adjustedTitle)
 						data, _ := ioutil.ReadAll(part.Body)
 
 						myNotes := parseNotes(adjustedTitle, data)
-						for _, note := range myNotes {
-							n.Notes = append(myNotes, note)
-						}
+						n.Notes = append(n.Notes, myNotes...)
+
 						n.Title = adjustedTitle
+						log.Println("Set title for notebook", n.Title)
 					}
 
 				}
@@ -250,25 +257,26 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 }
 
 // Write is used to write the Notes struct, for a given book, into a text file.
-// This creates a file with the name of <book-title>-notes.txt and writes each
+// This creates a file with the name of <book-title>-notebook.txt and writes each
 // Note struct into it, separating each entry with a newline.
 // TODO: Sort before writing so that notes appear before highlights etc?
 func Write(n *Notes) (int, error) {
 
-	log.Printf("Writing notes for %s", n.Title)
-
+	log.Printf("Writing notes for %s\n", n.Title)
 	var totalBytes int
 
-	notesFilename := fmt.Sprintf("%s-notes.txt", n.Title)
+	// The 'notebook' prefix is automatically added by Amazon to the CSV file, we can just use .txt as an extension
+	notesFilename := fmt.Sprintf("%s.txt", n.Title)
+	log.Println("Note file:", notesFilename)
 	f, err := os.Create(notesFilename)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer f.Close()
 
-	for _, x := range n.Notes {
+	for _, note := range n.Notes {
 		noteEntry := fmt.Sprintf("Annotation: %s\nLocation: %s\nType: %s\nStarred: %t\n\n",
-			x.Annotation, x.Location, x.Type, x.Starred)
+			note.Annotation, note.Location, note.Type, note.Starred)
 
 		bytesWritten, err := f.WriteString(noteEntry)
 		if err != nil {
@@ -278,6 +286,94 @@ func Write(n *Notes) (int, error) {
 	}
 
 	return totalBytes, nil
+}
+
+// exists returns whether the given file or directory exists
+func exists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
+
+// Save will write the titles which have been written into a 'completed notebooks' file of
+// key-value pairs, this is done in order to avoid parsing the same titles multiple times
+// when they have already been processed.
+func Save(n []*Notes) error {
+
+	booksCompleted := make(map[string]bool, len(n))
+
+	for _, completedBook := range n {
+		booksCompleted[completedBook.Title] = true
+	}
+
+	userHomeDirectory, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+
+	saveDirectory := fmt.Sprintf("%s/%s", userHomeDirectory, programDirectoryName)
+	saveDirectoryExists, err := exists(saveDirectory)
+	if err != nil {
+		return err
+	}
+
+	// Save the completed notebooks file if the home directory exists,
+	// otherwise we need to return an error
+	if saveDirectoryExists {
+		savePath := fmt.Sprintf("%s/completed-notebooks.yaml", saveDirectory)
+		f, err := os.Create(savePath)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		enc := yaml.NewEncoder(f)
+		defer enc.Close()
+
+		enc.Encode(booksCompleted)
+		log.Println("Written notes to", savePath)
+		return nil
+
+	} else {
+		return fmt.Errorf("a 'kindle-notes' directory does not at '%s' to write the completed notebooks save file", userHomeDirectory)
+	}
+}
+
+func loadCompletedBooks() (*map[string]bool, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, err
+	}
+
+	saveFilePath := fmt.Sprintf("%s/%s/completed-notebooks.yaml", homeDir, programDirectoryName)
+	saveFileExists, err := exists(saveFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	if saveFileExists {
+		f, err := os.Open(saveFilePath)
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+
+		completedBooks := make(map[string]bool)
+
+		decoder := yaml.NewDecoder(f)
+		decoder.Decode(completedBooks)
+		log.Println(completedBooks)
+
+		return &completedBooks, nil
+	}
+	blankMap := make(map[string]bool)
+	return &blankMap, nil
+
 }
 
 // New returns a default Notes struct with none of the fields populated, this is
