@@ -14,6 +14,8 @@ import (
 const (
 	testEmail    string = "test.email123@test.com"
 	testPassword string = "superSecret123"
+	emailEnv     string = "KNG_EMAIL"
+	passwordEnv  string = "KNG_PASSWORD"
 )
 
 type ConfigSuite struct {
