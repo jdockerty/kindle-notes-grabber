@@ -1,12 +1,10 @@
 package config_test
 
 import (
-	"io/ioutil"
-	"os"
-	"testing"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"os"
+	"testing"
 
 	"github.com/jdockerty/kindle-notes-grabber/config"
 )
