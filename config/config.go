@@ -6,6 +6,9 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Config is a struct for holding the exported configuration of the program,
+// this provides access to the variables that are required to log into an
+// email account.
 type Config struct {
 	Email    string `mapstructure:"email" env:"KNG_EMAIL"`
 	Password string `mapstructure:"password" env:"KNG_PASSWORD"`
