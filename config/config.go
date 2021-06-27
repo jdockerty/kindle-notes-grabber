@@ -11,8 +11,10 @@ type Config struct {
 	Password string `mapstructure:"password" env:"KNG_PASSWORD"`
 }
 
-// New uses the 'cleanenv' package to read from the relevant configuration file,
-// acting as a wrapper for the error and returning a correctly configured struct.
+// New returns a Config struct with the relevant values populated. This leverages
+// a configuration file by the name of 'kng-config.yaml', at a specified path, or by
+// the two environment variables: KNG_EMAIL and KNG_PASSWORD. Setting either of these
+// will satisfy the unmarshaling requirements into the struct. 
 func New(path string) (*Config, error) {
 
 	var cfg Config
