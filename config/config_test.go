@@ -1,12 +1,10 @@
 package config_test
 
 import (
-	"io/ioutil"
-	"os"
-	"testing"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"os"
+	"testing"
 
 	"github.com/jdockerty/kindle-notes-grabber/config"
 )
@@ -14,6 +12,8 @@ import (
 const (
 	testEmail    string = "test.email123@test.com"
 	testPassword string = "superSecret123"
+	emailEnv     string = "KNG_EMAIL"
+	passwordEnv  string = "KNG_PASSWORD"
 )
 
 type ConfigSuite struct {
@@ -30,10 +30,14 @@ password: superSecret123
 `)
 
 	// Create a temporary file to write our config into the current directory.
-	testFile, err := ioutil.TempFile(".", "test-config*.yaml")
+	testFile, err := os.Create("kng-config.yaml")
 	if err != nil {
 		suite.T().Fatalf("Error creating temporary config file: %s", err.Error())
 	}
+
+	// Unset the environment so that we rely on the test config file
+	os.Unsetenv(emailEnv)
+	os.Unsetenv(passwordEnv)
 
 	defer testFile.Close()
 	defer os.Remove(testFile.Name())
@@ -50,11 +54,6 @@ func (suite *ConfigSuite) TestConfig() {
 	assert.Equal(testPassword, suite.Conf.Password)
 }
 
-func (suite *ConfigSuite) TestInvalidConfigPath() {
-
-	_, err := config.New("some_fake_path/")
-	assert.Error(suite.T(), err, "Expected error return from function, got %s", err)
-}
 func TestConfigSuite(t *testing.T) {
 	suite.Run(t, new(ConfigSuite))
 }
