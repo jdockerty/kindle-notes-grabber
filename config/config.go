@@ -1,10 +1,8 @@
 package config
 
 import (
-	"log"
 	"os"
 
-	// "github.com/ilyakaznacheev/cleanenv"
 	"github.com/spf13/viper"
 )
 
@@ -17,14 +15,8 @@ type Config struct {
 // acting as a wrapper for the error and returning a correctly configured struct.
 func New(path string) (*Config, error) {
 
-	// // Return an error when the provided path is not valid.
-	// if isValidPath := fs.ValidPath(path); !isValidPath {
-	// 	errorMsg := fmt.Sprintf("Invalid path provided: %s", path)
-	// 	return nil, errors.New(errorMsg)
-	// }
-
 	var cfg Config
-	log.Println("Passed path", path)
+
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return nil, err
@@ -57,6 +49,5 @@ func New(path string) (*Config, error) {
 		return nil, err
 	}
 
-	log.Println("USING CONFIG", cfg)
 	return &cfg, nil
 }
