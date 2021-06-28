@@ -288,8 +288,8 @@ func Write(n *Notes) (int, error) {
 	return totalBytes, nil
 }
 
-// exists returns whether the given file or directory exists
-func exists(path string) (bool, error) {
+// Exists returns whether the given file or directory exists
+func Exists(path string) (bool, error) {
 	_, err := os.Stat(path)
 	if err == nil {
 		return true, nil
@@ -351,7 +351,7 @@ func loadCompletedBooks() (*map[string]bool, error) {
 	}
 
 	saveFilePath := fmt.Sprintf("%s/%s/completed-notebooks.yaml", homeDir, programDirectoryName)
-	saveFileExists, err := exists(saveFilePath)
+	saveFileExists, err := Exists(saveFilePath)
 	if err != nil {
 		return nil, err
 	}
