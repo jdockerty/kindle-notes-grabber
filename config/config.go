@@ -19,7 +19,7 @@ type Config struct {
 // New returns a Config struct with the relevant values populated. This leverages
 // a configuration file by the name of 'kng-config.yaml', at a specified path, or by
 // the two environment variables: KNG_EMAIL and KNG_PASSWORD. Setting either of these
-// will satisfy the unmarshaling requirements into the struct. 
+// will satisfy the unmarshaling requirements into the struct.
 func New(path string) (*Config, error) {
 
 	var cfg Config
