@@ -317,31 +317,20 @@ func Save(n []*Notes) error {
 	}
 
 	saveDirectory := fmt.Sprintf("%s/%s", userHomeDirectory, programDirectoryName)
-	saveDirectoryExists, err := exists(saveDirectory)
+	savePath := fmt.Sprintf("%s/completed-notebooks.yaml", saveDirectory)
+	f, err := os.Create(savePath)
 	if err != nil {
 		return err
 	}
+	defer f.Close()
 
-	// Save the completed notebooks file if the home directory exists,
-	// otherwise we need to return an error
-	if saveDirectoryExists {
-		savePath := fmt.Sprintf("%s/completed-notebooks.yaml", saveDirectory)
-		f, err := os.Create(savePath)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
+	enc := yaml.NewEncoder(f)
+	defer enc.Close()
 
-		enc := yaml.NewEncoder(f)
-		defer enc.Close()
+	enc.Encode(booksCompleted)
+	log.Println("Written notes to", savePath)
+	return nil
 
-		enc.Encode(booksCompleted)
-		log.Println("Written notes to", savePath)
-		return nil
-
-	} else {
-		return fmt.Errorf("a 'kindle-notes' directory does not at '%s' to write the completed notebooks save file", userHomeDirectory)
-	}
 }
 
 func loadCompletedBooks() (*map[string]bool, error) {
