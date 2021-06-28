@@ -1,8 +1,10 @@
 package config
 
 import (
+	"fmt"
 	"os"
 
+	"github.com/jdockerty/kindle-notes-grabber/notes"
 	"github.com/spf13/viper"
 )
 
@@ -25,6 +27,16 @@ func New(path string) (*Config, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return nil, err
+	}
+
+	dirPath := fmt.Sprintf("%s/%s", homeDir, "kindle-notes")
+	dirExists, err := notes.Exists(dirPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if !dirExists {
+		return nil, fmt.Errorf("a 'kindle-notes' directory does not at '%s' to write the completed notebooks save file", homeDir)
 	}
 
 	viper.SetEnvPrefix("KNG")
