@@ -196,10 +196,7 @@ func parseNotes(title string, emailAttachment []byte) []Note {
 }
 
 func (n *Notes) Populate(mailReaders []*mail.Reader) {
-	completedBooks, err := loadCompletedBooks()
-	if err != nil {
-		panic(err)
-	}
+
 	for _, mailReader := range mailReaders {
 		header := mailReader.Header
 		subject, err := header.Subject()
@@ -232,11 +229,6 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 
 						// Change the title to lower case and replace spaces with dashes for consistency
 						adjustedTitle := strings.ReplaceAll(strings.ToLower(bookTitle), " ", "-")
-
-						if _, ok := (*completedBooks)[adjustedTitle]; ok {
-							log.Printf("%s already seen", adjustedTitle)
-							continue
-						}
 
 						log.Println("Adjusted title:", adjustedTitle)
 						data, _ := ioutil.ReadAll(part.Body)
@@ -305,10 +297,10 @@ func Exists(path string) (bool, error) {
 // when they have already been processed.
 func Save(n []*Notes) error {
 
-	booksCompleted := make(map[string]bool, len(n))
+	booksCompleted := make(map[string]struct{}, len(n))
 
 	for _, completedBook := range n {
-		booksCompleted[completedBook.Title] = true
+		booksCompleted[completedBook.Title] = struct{}{}
 	}
 
 	userHomeDirectory, err := os.UserHomeDir()
@@ -333,7 +325,13 @@ func Save(n []*Notes) error {
 
 }
 
-func loadCompletedBooks() (*map[string]bool, error) {
+// LoadCompletedBooks returns a mapping between the book title and a blank value.
+// A book key being within the mapping indicates that it has been read, it is therefore skipped if
+// it is noticed on the next pass of parsing email attachments.
+func LoadCompletedBooks() (*map[string]struct{}, error) {
+
+	completedBooks := make(map[string]struct{})
+
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return nil, err
@@ -352,16 +350,14 @@ func loadCompletedBooks() (*map[string]bool, error) {
 		}
 		defer f.Close()
 
-		completedBooks := make(map[string]bool)
-
 		decoder := yaml.NewDecoder(f)
 		decoder.Decode(completedBooks)
 		log.Println(completedBooks)
 
 		return &completedBooks, nil
 	}
-	blankMap := make(map[string]bool)
-	return &blankMap, nil
+
+	return &completedBooks, nil
 
 }
 

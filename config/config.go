@@ -36,7 +36,7 @@ func New(path string) (*Config, error) {
 	}
 
 	if !dirExists {
-		return nil, fmt.Errorf("a 'kindle-notes' directory does not at '%s' to write the completed notebooks save file", homeDir)
+		return nil, fmt.Errorf("a 'kindle-notes' directory does not exist at '%s' to write the completed notebooks save file", homeDir)
 	}
 
 	viper.SetEnvPrefix("KNG")

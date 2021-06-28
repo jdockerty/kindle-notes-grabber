@@ -1,10 +1,12 @@
 package config_test
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
+	"fmt"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/jdockerty/kindle-notes-grabber/config"
 )
@@ -28,6 +30,11 @@ func (suite *ConfigSuite) SetupTest() {
 email: test.email123@test.com
 password: superSecret123
 `)
+
+	homeDir, err := os.UserHomeDir()
+	suite.Assertions.Nil(err)
+	setupDir := fmt.Sprintf("%s/kindle-notes", homeDir)
+	os.Create(setupDir)
 
 	// Create a temporary file to write our config into the current directory.
 	testFile, err := os.Create("kng-config.yaml")

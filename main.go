@@ -54,11 +54,27 @@ func main() {
 
 	var notesCollection []*notes.Notes
 	var section imap.BodySectionName
+
+	completedBooks, err := notes.LoadCompletedBooks()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	for _, id := range ids {
 		myNotes := notes.New()
 		messages := myNotes.GetAmazonMessage(c, id, section)
 		mailReaders := myNotes.GetMailReaders(messages, section)
 		myNotes.Populate(mailReaders)
+
+		// If the title exists in the map, skip it
+		if _, ok := (*completedBooks)[myNotes.Title]; ok {
+			log.Printf("%s already seen", myNotes.Title)
+			continue
+		}
+		
+		log.Printf("Adding %s to map", myNotes.Title)
+		(*completedBooks)[myNotes.Title] = struct{}{}
+
 		notes.Write(myNotes)
 		notesCollection = append(notesCollection, myNotes)
 	}
