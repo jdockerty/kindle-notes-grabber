@@ -325,7 +325,13 @@ func Save(n []*Notes) error {
 
 }
 
-func loadCompletedBooks() (*map[string]bool, error) {
+// LoadCompletedBooks returns a mapping between the book title and a blank value.
+// A book key being within the mapping indicates that it has been read, it is therefore skipped if
+// it is noticed on the next pass of parsing email attachments.
+func LoadCompletedBooks() (*map[string]struct{}, error) {
+
+	completedBooks := make(map[string]struct{})
+
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return nil, err
@@ -344,16 +350,14 @@ func loadCompletedBooks() (*map[string]bool, error) {
 		}
 		defer f.Close()
 
-		completedBooks := make(map[string]bool)
-
 		decoder := yaml.NewDecoder(f)
 		decoder.Decode(completedBooks)
 		log.Println(completedBooks)
 
 		return &completedBooks, nil
 	}
-	blankMap := make(map[string]bool)
-	return &blankMap, nil
+
+	return &completedBooks, nil
 
 }
 
