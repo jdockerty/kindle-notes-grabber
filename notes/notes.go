@@ -196,10 +196,7 @@ func parseNotes(title string, emailAttachment []byte) []Note {
 }
 
 func (n *Notes) Populate(mailReaders []*mail.Reader) {
-	completedBooks, err := loadCompletedBooks()
-	if err != nil {
-		panic(err)
-	}
+
 	for _, mailReader := range mailReaders {
 		header := mailReader.Header
 		subject, err := header.Subject()
@@ -232,11 +229,6 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 
 						// Change the title to lower case and replace spaces with dashes for consistency
 						adjustedTitle := strings.ReplaceAll(strings.ToLower(bookTitle), " ", "-")
-
-						if _, ok := (*completedBooks)[adjustedTitle]; ok {
-							log.Printf("%s already seen", adjustedTitle)
-							continue
-						}
 
 						log.Println("Adjusted title:", adjustedTitle)
 						data, _ := ioutil.ReadAll(part.Body)
@@ -305,10 +297,10 @@ func Exists(path string) (bool, error) {
 // when they have already been processed.
 func Save(n []*Notes) error {
 
-	booksCompleted := make(map[string]bool, len(n))
+	booksCompleted := make(map[string]struct{}, len(n))
 
 	for _, completedBook := range n {
-		booksCompleted[completedBook.Title] = true
+		booksCompleted[completedBook.Title] = struct{}{}
 	}
 
 	userHomeDirectory, err := os.UserHomeDir()
