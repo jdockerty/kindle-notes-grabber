@@ -22,6 +22,7 @@ type Config struct {
 type IMAPServer struct {
 	ServiceName string
 	Address     string
+	Socket      string
 	Port        int
 }
 
@@ -95,4 +96,5 @@ func (im *IMAPServer) Populate(serviceName string) {
 	im.ServiceName = sanitisedServiceName
 	im.Address = imapServer
 	im.Port = 993
+	im.Socket = fmt.Sprintf("%s:%d", im.Address, im.Port)
 }
