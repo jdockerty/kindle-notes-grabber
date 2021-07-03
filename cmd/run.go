@@ -34,18 +34,18 @@ var serviceName string
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run",
-	Short: "grab your kindle notes from a defined email inbox",
+	Short: "Grab your kindle notes from a defined email inbox",
 	Long: `Start the application and it will parse the emails which
 match the relevant criteria from Amazon as kindle notes, placing them
 into a .txt file with various metadata about the note or highlight,
 such as page number it was taken and its type.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		conf = initConfig()
-		log.Println("Attempting to connect to providers server...")
+
 
 		var im config.IMAPServer
 		im.Populate(serviceName)
-
+		log.Printf("Attempting to connect to %s server...\n", im.ServiceName)
 		c, err := client.DialTLS(im.Socket, nil)
 		if err != nil {
 			log.Fatal(err)
