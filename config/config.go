@@ -21,15 +21,15 @@ type Config struct {
 // providers IMAP server for accessing a mailbox.
 type IMAPServer struct {
 	ServiceName string
-	Address string
-	Port int
+	Address     string
+	Port        int
 }
 
 var serviceNameToIMAPServer map[string]string = map[string]string{
-	"gmail": "imap.gmail.com",
+	"gmail":   "imap.gmail.com",
 	"outlook": "imap-mail.outlook.com",
-	"yahoo": "imap.mail.yahoo.com",
-	"aol": "imap.aol.com",
+	"yahoo":   "imap.mail.yahoo.com",
+	"aol":     "imap.aol.com",
 }
 
 // New returns a Config struct with the relevant values populated. This leverages
@@ -86,8 +86,8 @@ func New(path string) (*Config, error) {
 }
 
 // Populate is used to fill in the relevant information for an IMAP server given a simple service
-//  name, regardless of case, such as 'gmail' or 'outlook'. Note, that there are limited service mappings at this time.
-func(im *IMAPServer) Populate(serviceName string) {
+// name, regardless of case, such as 'gmail' or 'outlook'. Note, that there are limited service mappings at this time.
+func (im *IMAPServer) Populate(serviceName string) {
 	sanitisedServiceName := strings.ToLower(serviceName)
 
 	imapServer := serviceNameToIMAPServer[sanitisedServiceName]
