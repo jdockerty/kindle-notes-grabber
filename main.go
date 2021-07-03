@@ -25,7 +25,10 @@ func main() {
 	log.Println("Connecting to server...")
 
 	// Connect to server
-	c, err := client.DialTLS("imap.gmail.com:993", nil)
+
+	var im config.IMAPServer
+	im.Populate("gmail")
+	c, err := client.DialTLS(im.Socket, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
