@@ -10,7 +10,6 @@ import (
 )
 
 const (
-	// TODO: Modify to take user argument later on, a flag with a default set if not specified.
 	configPath = "kng-config.yaml"
 	fromAmazon = "FROM no-reply@amazon.com"
 	mailbox    = "INBOX"
