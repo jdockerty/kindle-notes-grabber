@@ -84,3 +84,15 @@ func New(path string) (*Config, error) {
 
 	return &cfg, nil
 }
+
+// Populate is used to fill in the relevant information for an IMAP server given a simple service
+//  name, regardless of case, such as 'gmail' or 'outlook'. Note, that there are limited service mappings at this time.
+func(im *IMAPServer) Populate(serviceName string) {
+	sanitisedServiceName := strings.ToLower(serviceName)
+
+	imapServer := serviceNameToIMAPServer[sanitisedServiceName]
+
+	im.ServiceName = sanitisedServiceName
+	im.Address = imapServer
+	im.Port = 993
+}
