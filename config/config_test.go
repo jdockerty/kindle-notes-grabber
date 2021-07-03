@@ -64,3 +64,40 @@ func (suite *ConfigSuite) TestConfig() {
 func TestConfigSuite(t *testing.T) {
 	suite.Run(t, new(ConfigSuite))
 }
+
+func TestProviderMappingIsCorrect(t *testing.T) {
+	assert := assert.New(t)
+
+	gmailVariants := []string{
+		"gmail",
+		"GMAIL",
+		"GMaIl",
+	}
+
+	outlookVariants := []string{
+		"outlook",
+		"OUTLOOK",
+		"OutLOok",
+	}
+	
+	
+	for _, variant := range gmailVariants {
+		var ims config.IMAPServer
+
+		ims.Populate(variant)
+
+		assert.Equal("gmail", ims.ServiceName)
+		assert.Equal(993, ims.Port)
+		assert.Equal("imap.gmail.com", ims.Address)
+	}
+
+	for _, variant := range outlookVariants {
+		var ims config.IMAPServer
+
+		ims.Populate(variant)
+
+		assert.Equal("outlook", ims.ServiceName)
+		assert.Equal(993, ims.Port)
+		assert.Equal("imap-mail.outlook.com", ims.Address)
+	}
+}
