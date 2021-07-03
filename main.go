@@ -71,7 +71,7 @@ func main() {
 			log.Printf("%s already seen", myNotes.Title)
 			continue
 		}
-		
+
 		log.Printf("Adding %s to map", myNotes.Title)
 		(*completedBooks)[myNotes.Title] = struct{}{}
 
