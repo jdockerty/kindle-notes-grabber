@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/jdockerty/kindle-notes-grabber/notes"
 	"github.com/spf13/viper"
@@ -14,6 +15,21 @@ import (
 type Config struct {
 	Email    string `mapstructure:"email" env:"KNG_EMAIL"`
 	Password string `mapstructure:"password" env:"KNG_PASSWORD"`
+}
+
+// IMAPServer is a struct for storing the relevant information for a
+// providers IMAP server for accessing a mailbox.
+type IMAPServer struct {
+	ServiceName string
+	Address string
+	Port int
+}
+
+var serviceNameToIMAPServer map[string]string = map[string]string{
+	"gmail": "imap.gmail.com",
+	"outlook": "imap-mail.outlook.com",
+	"yahoo": "imap.mail.yahoo.com",
+	"aol": "imap.aol.com",
 }
 
 // New returns a Config struct with the relevant values populated. This leverages
