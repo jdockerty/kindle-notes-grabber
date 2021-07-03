@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/jdockerty/kindle-notes-grabber/notes"
 	"github.com/spf13/viper"
@@ -14,6 +15,22 @@ import (
 type Config struct {
 	Email    string `mapstructure:"email" env:"KNG_EMAIL"`
 	Password string `mapstructure:"password" env:"KNG_PASSWORD"`
+}
+
+// IMAPServer is a struct for storing the relevant information for a
+// providers IMAP server for accessing a mailbox.
+type IMAPServer struct {
+	ServiceName string
+	Address     string
+	Socket      string
+	Port        int
+}
+
+var serviceNameToIMAPServer map[string]string = map[string]string{
+	"gmail":   "imap.gmail.com",
+	"outlook": "imap-mail.outlook.com",
+	"yahoo":   "imap.mail.yahoo.com",
+	"aol":     "imap.aol.com",
 }
 
 // New returns a Config struct with the relevant values populated. This leverages
@@ -67,4 +84,17 @@ func New(path string) (*Config, error) {
 	}
 
 	return &cfg, nil
+}
+
+// Populate is used to fill in the relevant information for an IMAP server given a simple service
+// name, regardless of case, such as 'gmail' or 'outlook'. Note, that there are limited service mappings at this time.
+func (im *IMAPServer) Populate(serviceName string) {
+	sanitisedServiceName := strings.ToLower(serviceName)
+
+	imapServer := serviceNameToIMAPServer[sanitisedServiceName]
+
+	im.ServiceName = sanitisedServiceName
+	im.Address = imapServer
+	im.Port = 993
+	im.Socket = fmt.Sprintf("%s:%d", im.Address, im.Port)
 }

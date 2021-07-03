@@ -10,7 +10,6 @@ import (
 )
 
 const (
-	// TODO: Modify to take user argument later on, a flag with a default set if not specified.
 	configPath = "kng-config.yaml"
 	fromAmazon = "FROM no-reply@amazon.com"
 	mailbox    = "INBOX"
@@ -25,8 +24,10 @@ func main() {
 	log.Println("Connecting to server...")
 
 	// Connect to server
-	// TODO: Implement other providers as mapping format, e.g. gmail : imap.gmail.com:993
-	c, err := client.DialTLS("imap.gmail.com:993", nil)
+
+	var im config.IMAPServer
+	im.Populate("gmail")
+	c, err := client.DialTLS(im.Socket, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -71,7 +72,7 @@ func main() {
 			log.Printf("%s already seen", myNotes.Title)
 			continue
 		}
-		
+
 		log.Printf("Adding %s to map", myNotes.Title)
 		(*completedBooks)[myNotes.Title] = struct{}{}
 
