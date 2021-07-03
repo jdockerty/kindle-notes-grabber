@@ -79,8 +79,7 @@ func TestProviderMappingIsCorrect(t *testing.T) {
 		"OUTLOOK",
 		"OutLOok",
 	}
-	
-	
+
 	for _, variant := range gmailVariants {
 		var ims config.IMAPServer
 
