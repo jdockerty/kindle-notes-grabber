@@ -42,7 +42,6 @@ such as page number it was taken and its type.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		conf = initConfig()
 
-
 		var im config.IMAPServer
 		im.Populate(serviceName)
 		log.Printf("Attempting to connect to %s server...\n", im.ServiceName)
@@ -61,48 +60,48 @@ such as page number it was taken and its type.`,
 		}
 		log.Println("Logged in")
 
-			_, err = c.Select(mailbox, false)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// NOTE: Hard-coded criteria for now.
-	criteria := *imap.NewSearchCriteria()
-	criteria.Body = []string{fromAmazon}
-
-	ids := notes.GetEmailIds(c, &criteria)
-
-	var notesCollection []*notes.Notes
-	var section imap.BodySectionName
-
-	completedBooks, err := notes.LoadCompletedBooks()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, id := range ids {
-		myNotes := notes.New()
-		messages := myNotes.GetAmazonMessage(c, id, section)
-		mailReaders := myNotes.GetMailReaders(messages, section)
-		myNotes.Populate(mailReaders)
-
-		// If the title exists in the map, skip it
-		if _, ok := (*completedBooks)[myNotes.Title]; ok {
-			log.Printf("%s already seen", myNotes.Title)
-			continue
+		_, err = c.Select(mailbox, false)
+		if err != nil {
+			log.Fatal(err)
 		}
 
-		log.Printf("Adding %s to map", myNotes.Title)
-		(*completedBooks)[myNotes.Title] = struct{}{}
+		// NOTE: Hard-coded criteria for now.
+		criteria := *imap.NewSearchCriteria()
+		criteria.Body = []string{fromAmazon}
 
-		notes.Write(myNotes)
-		notesCollection = append(notesCollection, myNotes)
-	}
+		ids := notes.GetEmailIds(c, &criteria)
 
-	err = notes.Save(notesCollection)
-	if err != nil {
-		log.Fatal(err)
-	}
+		var notesCollection []*notes.Notes
+		var section imap.BodySectionName
+
+		completedBooks, err := notes.LoadCompletedBooks()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, id := range ids {
+			myNotes := notes.New()
+			messages := myNotes.GetAmazonMessage(c, id, section)
+			mailReaders := myNotes.GetMailReaders(messages, section)
+			myNotes.Populate(mailReaders)
+
+			// If the title exists in the map, skip it
+			if _, ok := (*completedBooks)[myNotes.Title]; ok {
+				log.Printf("%s already seen", myNotes.Title)
+				continue
+			}
+
+			log.Printf("Adding %s to map", myNotes.Title)
+			(*completedBooks)[myNotes.Title] = struct{}{}
+
+			notes.Write(myNotes)
+			notesCollection = append(notesCollection, myNotes)
+		}
+
+		err = notes.Save(notesCollection)
+		if err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 
