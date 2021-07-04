@@ -3,6 +3,7 @@ package notes
 import (
 	"bytes"
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -286,7 +287,7 @@ func Exists(path string) (bool, error) {
 	if err == nil {
 		return true, nil
 	}
-	if os.IsNotExist(err) {
+	if errors.Is(err, os.ErrNotExist) {
 		return false, nil
 	}
 	return false, err
@@ -352,7 +353,6 @@ func LoadCompletedBooks() (*map[string]struct{}, error) {
 
 		decoder := yaml.NewDecoder(f)
 		decoder.Decode(completedBooks)
-		log.Println(completedBooks)
 
 		return &completedBooks, nil
 	}
