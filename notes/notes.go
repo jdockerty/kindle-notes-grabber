@@ -353,7 +353,6 @@ func LoadCompletedBooks() (*map[string]struct{}, error) {
 
 		decoder := yaml.NewDecoder(f)
 		decoder.Decode(completedBooks)
-		log.Println(completedBooks)
 
 		return &completedBooks, nil
 	}
