@@ -1,5 +1,5 @@
 /*
-Copyright © 2020 Jack Dockerty
+Copyright © 2021 Jack Dockerty
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -100,6 +100,7 @@ func createDirectory(homeDirectory, fullDirPath string) error {
 
 	return nil
 }
+
 func createSaveFile(dir, savePath string) error {
 	fmt.Printf("Creating '%s' in '%s'\n", saveFile, dir)
 	// We can discard the file pointer returned here, as we just need to create it
