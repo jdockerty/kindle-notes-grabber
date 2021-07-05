@@ -17,7 +17,7 @@ package cmd
 
 import (
 	"log"
-
+	"fmt"
 	"github.com/jdockerty/kindle-notes-grabber/config"
 	"github.com/jdockerty/kindle-notes-grabber/notes"
 	"github.com/spf13/cobra"
@@ -43,12 +43,11 @@ such as page number it was taken and its type.`,
 
 		var im config.IMAPServer
 		im.Populate(serviceName)
-		log.Printf("Attempting to connect to %s server...\n", im.ServiceName)
+		fmt.Printf("Attempting to connect to %s server...\n", im.ServiceName)
 		c, err := client.DialTLS(im.Socket, nil)
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Println("Connected")
 
 		// Don't forget to logout
 		defer c.Logout()
@@ -57,7 +56,7 @@ such as page number it was taken and its type.`,
 		if err := c.Login(conf.Email, conf.Password); err != nil {
 			log.Fatal(err)
 		}
-		log.Println("Logged in")
+		fmt.Println("Logged in")
 
 		_, err = c.Select(mailbox, false)
 		if err != nil {
@@ -86,11 +85,10 @@ such as page number it was taken and its type.`,
 
 			// If the title exists in the map, skip it
 			if _, ok := (*completedBooks)[myNotes.Title]; ok {
-				log.Printf("%s already seen", myNotes.Title)
+				fmt.Printf("Book %s has already been seen\n", myNotes.Title)
 				continue
 			}
 
-			log.Printf("Adding %s to map", myNotes.Title)
 			(*completedBooks)[myNotes.Title] = struct{}{}
 
 			notes.Write(myNotes)
