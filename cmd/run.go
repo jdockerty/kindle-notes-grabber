@@ -27,7 +27,6 @@ import (
 )
 
 var conf *config.Config
-var cfgFile string
 
 var serviceName string
 
