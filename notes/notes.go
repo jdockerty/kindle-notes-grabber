@@ -68,7 +68,6 @@ func GetEmailIds(c imapClient, sc *imap.SearchCriteria) []uint32 {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Got Ids:", ids)
 	return ids
 }
 
@@ -108,7 +107,7 @@ func (n *Notes) GetMailReaders(messages <-chan *imap.Message, section imap.BodyS
 
 		mailReader, err := mail.CreateReader(messageBody)
 		if err != nil {
-			log.Println("Using unknown charset for reading mail header.")
+			fmt.Println("Using unknown charset for reading mail header.")
 		}
 
 		mailReaders = append(mailReaders, mailReader)
@@ -210,7 +209,7 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 				if err == io.EOF {
 					break
 				} else if err != nil {
-					log.Println("Unknown charset in use, but usable part provided")
+					fmt.Println("Unknown charset in use, but usable part provided")
 				}
 
 				switch h := part.Header.(type) {
@@ -219,7 +218,7 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 				case *mail.AttachmentHeader:
 
 					if filename, _ := h.Filename(); strings.HasSuffix(filename, ".csv") {
-						log.Println("Got file:", filename)
+						fmt.Println("Got file:", filename)
 
 						_, params, err := h.ContentType()
 						if err != nil {
@@ -231,14 +230,13 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 						// Change the title to lower case and replace spaces with dashes for consistency
 						adjustedTitle := strings.ReplaceAll(strings.ToLower(bookTitle), " ", "-")
 
-						log.Println("Adjusted title:", adjustedTitle)
 						data, _ := ioutil.ReadAll(part.Body)
 
 						myNotes := parseNotes(adjustedTitle, data)
 						n.Notes = append(n.Notes, myNotes...)
 
 						n.Title = adjustedTitle
-						log.Println("Set title for notebook", n.Title)
+						fmt.Println("Set title for notebook", n.Title)
 					}
 
 				}
@@ -255,12 +253,12 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 // TODO: Sort before writing so that notes appear before highlights etc?
 func Write(n *Notes) (int, error) {
 
-	log.Printf("Writing notes for %s\n", n.Title)
+	fmt.Printf("Writing notes for %s\n", n.Title)
 	var totalBytes int
 
 	// The 'notebook' prefix is automatically added by Amazon to the CSV file, we can just use .txt as an extension
 	notesFilename := fmt.Sprintf("%s.txt", n.Title)
-	log.Println("Note file:", notesFilename)
+
 	f, err := os.Create(notesFilename)
 	if err != nil {
 		log.Fatal(err)
@@ -321,7 +319,7 @@ func Save(n []*Notes) error {
 	defer enc.Close()
 
 	enc.Encode(booksCompleted)
-	log.Println("Written notes to", savePath)
+	fmt.Println("Written notes to", savePath)
 	return nil
 
 }
