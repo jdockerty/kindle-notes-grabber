@@ -83,9 +83,10 @@ such as page number it was taken and its type.`,
 			mailReaders := myNotes.GetMailReaders(messages, section)
 			myNotes.Populate(mailReaders)
 
-			// If the title exists in the map, skip it
+			// If the title exists in the map, add to collection for the save, but skip writing/adding to map.
 			if _, ok := (*completedBooks)[myNotes.Title]; ok {
 				fmt.Printf("Book %s has already been seen\n", myNotes.Title)
+				notesCollection = append(notesCollection, myNotes)
 				continue
 			}
 
