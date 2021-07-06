@@ -18,7 +18,6 @@ package cmd
 import (
 	"fmt"
 	"strings"
-
 	"github.com/jdockerty/kindle-notes-grabber/notes"
 	"github.com/spf13/cobra"
 )
