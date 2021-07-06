@@ -236,7 +236,6 @@ func (n *Notes) Populate(mailReaders []*mail.Reader) {
 						n.Notes = append(n.Notes, myNotes...)
 
 						n.Title = adjustedTitle
-						fmt.Println("Set title for notebook", n.Title)
 					}
 
 				}
