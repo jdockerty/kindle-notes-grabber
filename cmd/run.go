@@ -29,7 +29,6 @@ import (
 var conf *config.Config
 
 var serviceName string
-var numMessages int
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
@@ -108,7 +107,6 @@ func init() {
 	rootCmd.AddCommand(runCmd)
 
 	runCmd.Flags().StringVarP(&serviceName, "service", "s", "gmail", "The service name of a particular provider.")
-	// runCmd.Flags().IntVarP(&numMessages, "messages", "m", 10, "Total number of Amazon messages to retrieve from your account")
 }
 
 // initConfig reads in config file and ENV variables if set.
