@@ -71,7 +71,7 @@ func GetEmailIds(c imapClient, sc *imap.SearchCriteria) []uint32 {
 	return ids
 }
 
-func (n *Notes) GetAmazonMessage(c imapClient, id uint32, messageCount int, section imap.BodySectionName) <-chan *imap.Message {
+func (n *Notes) GetAmazonMessage(c imapClient, id uint32, section imap.BodySectionName) <-chan *imap.Message {
 	// Create a set of UIDs for the emails, each email has a specific ID associated with it
 	seqSet := new(imap.SeqSet)
 
@@ -81,9 +81,8 @@ func (n *Notes) GetAmazonMessage(c imapClient, id uint32, messageCount int, sect
 	// Get the whole message body
 	items := []imap.FetchItem{section.FetchItem()}
 
-	// Bufferred channel for the last 10 messages
-	// NOTE: Could make this user configurable in the future?
-	messages := make(chan *imap.Message, messageCount)
+	// Bufferred channel for each message
+	messages := make(chan *imap.Message, 1)
 
 	// Run separate goroutine for fetching messages, these are
 	// passed back over the channel defined above
