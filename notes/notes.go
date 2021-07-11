@@ -81,7 +81,7 @@ func (n *Notes) GetAmazonMessage(c imapClient, id uint32, section imap.BodySecti
 	// Get the whole message body
 	items := []imap.FetchItem{section.FetchItem()}
 
-	// Bufferred channel for each message
+	// Bufferred channel for each message, as this provides a single id per iteration
 	messages := make(chan *imap.Message, 1)
 
 	// Run separate goroutine for fetching messages, these are
