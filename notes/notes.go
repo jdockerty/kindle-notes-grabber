@@ -54,6 +54,8 @@ type Notes struct {
 	Notes []Note
 }
 
+// GetEmailIds will return a slice of uint32 ids for each message within
+// an inbox, provided a particular search criteria. Each ID is a reference to a given message.
 func GetEmailIds(c imapClient, sc *imap.SearchCriteria) []uint32 {
 
 	// TODO: Look into searching via IMAP, this doesn't seem to work
@@ -71,6 +73,8 @@ func GetEmailIds(c imapClient, sc *imap.SearchCriteria) []uint32 {
 	return ids
 }
 
+// GetAmazonMessage takes a singular ID and places it into a buffered channel, returning that channel to be read from
+// once it has completed its work.
 func (n *Notes) GetAmazonMessage(c imapClient, id uint32, section imap.BodySectionName) <-chan *imap.Message {
 	// Create a set of UIDs for the emails, each email has a specific ID associated with it
 	seqSet := new(imap.SeqSet)
@@ -82,19 +86,21 @@ func (n *Notes) GetAmazonMessage(c imapClient, id uint32, section imap.BodySecti
 	items := []imap.FetchItem{section.FetchItem()}
 
 	// Bufferred channel for each message, as this provides a single id per iteration
-	messages := make(chan *imap.Message, 1)
+	message := make(chan *imap.Message, 1)
 
 	// Run separate goroutine for fetching messages, these are
 	// passed back over the channel defined above
 	go func() {
-		if err := c.Fetch(seqSet, items, messages); err != nil {
+		if err := c.Fetch(seqSet, items, message); err != nil {
 			log.Fatal(err)
 		}
 	}()
 
-	return messages
+	return message
 }
 
+// GetMailReaders reads from the channel that was passed in as a result of the `GetAmazonMessage` function, this function
+// is what enables the parsing of the actual content, such as attachments and other metadata.
 func (n *Notes) GetMailReaders(messages <-chan *imap.Message, section imap.BodySectionName) []*mail.Reader {
 
 	var mailReaders []*mail.Reader
@@ -194,6 +200,8 @@ func parseNotes(title string, emailAttachment []byte) []Note {
 	return parsedNotes
 }
 
+// Populate will fill in data to the 'Notes' struct when the slice of mail readers are
+// provided to it. The result here is that the relevant fields are populated by this call.
 func (n *Notes) Populate(mailReaders []*mail.Reader) {
 
 	for _, mailReader := range mailReaders {
