@@ -80,7 +80,7 @@ such as page number it was taken and its type.`,
 
 		for _, id := range ids {
 			myNotes := notes.New()
-			messages := myNotes.GetAmazonMessage(c, id, numMessages, section)
+			messages := myNotes.GetAmazonMessage(c, id, section)
 			mailReaders := myNotes.GetMailReaders(messages, section)
 			myNotes.Populate(mailReaders)
 
@@ -108,7 +108,7 @@ func init() {
 	rootCmd.AddCommand(runCmd)
 
 	runCmd.Flags().StringVarP(&serviceName, "service", "s", "gmail", "The service name of a particular provider.")
-	runCmd.Flags().IntVarP(&numMessages, "messages", "m", 10, "Total number of Amazon messages to retrieve from your account")
+	// runCmd.Flags().IntVarP(&numMessages, "messages", "m", 10, "Total number of Amazon messages to retrieve from your account")
 }
 
 // initConfig reads in config file and ENV variables if set.
