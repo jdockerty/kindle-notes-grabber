@@ -87,7 +87,8 @@ func TestGetAmazonMessage(t *testing.T) {
 	n := notes.New()
 
 	var fakeId uint32 = 1
-	msgs := n.GetAmazonMessage(m, fakeId, section)
+	var numMessages int = 50
+	msgs := n.GetAmazonMessage(m, fakeId, numMessages, section)
 
 	var receiveChannelType <-chan *imap.Message
 	assert.IsType(receiveChannelType, msgs)
