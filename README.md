@@ -2,7 +2,7 @@
 
 A command-line app to check for `Amazon Kindle` emails in your account that contain attached CSV notes from a particular book, outputting these in a neat format to `$HOME/kindle-notes/<book-title>-notebook.txt`. Once you've finished a book, run this application to have your notes saved to your computer, do whatever you wish with them after!
 
-This repository also offers various packages for dealing with IMAP and Amazon Kindle emails with an attached CSV, namely in the `notes` package.
+This repository also offers a package for dealing with IMAP and Amazon Kindle emails with an attached CSV, namely in the `notes` package.
 
 ## Install
 
